@@ -1,0 +1,250 @@
+SISTEMA DE ORQUESTACIÓN UWB (Raspberry + Wear OS + DWM3001)
+
+------------------------------------------------------------
+1. DESCRIPCIÓN GENERAL
+------------------------------------------------------------
+
+Este sistema coordina sesiones de medición UWB (Ultra-Wideband) entre:
+
+- Un reloj Wear OS (dispositivo móvil)
+- Una Raspberry Pi (orquestador)
+- Una placa UWB DWM3001 (anchor)
+
+La comunicación se basa en MQTT y el sistema está dividido en dos programas principales:
+
+1) orquestador_uwb.py → Orquestador (control lógico)
+2) run_fira_twr.py → Ejecutor UWB (comunicación con la placa)
+
+---
+
+------------------------------------------------------------
+2. FLUJO GENERAL DEL SISTEMA
+------------------------------------------------------------
+
+El flujo completo de una sesión es el siguiente:
+
+1. La Raspberry se conecta al broker MQTT
+2. La Raspberry solicita una sesión al reloj
+3. El reloj prepara UWB y obtiene su MAC temporal
+4. El reloj publica esa MAC en MQTT
+5. La Raspberry recibe la MAC
+6. La Raspberry lanza el ranging real con la placa
+7. Se recogen las medidas (distancia, RSSI)
+8. Se almacenan los datos
+9. La Raspberry ordena parar la sesión
+
+---
+
+------------------------------------------------------------
+3. FUNCIONAMIENTO DE mqtt_uwb_v2.py (ORQUESTADOR)
+------------------------------------------------------------
+
+Este script es el encargado de coordinar todo el sistema.
+
+3.1 Inicialización
+
+- Se conecta al broker MQTT
+- Se suscribe a:
+  uwb/presence/+
+  uwb/session/+
+- Inicializa estructuras internas:
+  - relojes (watches)
+  - sesiones (sessions)
+
+---
+
+3.2 Inicio de sesión
+
+La Raspberry crea una sesión y envía:
+
+{
+  "action": "start",
+  "anchor": "00:01",
+  "session_id": "sess_xxxx"
+}
+
+al topic:
+
+uwb/commands/<watch_id>
+
+---
+
+3.3 Respuesta del reloj
+
+El reloj:
+
+1. Ejecuta prepareSession()
+2. Genera una MAC UWB temporal
+3. Publica en:
+
+uwb/session/<watch_id>
+
+un mensaje como:
+
+{
+  "watch_id": "watch_01",
+  "uwb_mac": "AB:CD",
+  "anchor": "00:01",
+  "state": "prepared",
+  "session_id": "sess_xxxx"
+}
+
+---
+
+3.4 Procesamiento en la Raspberry
+
+Cuando recibe ese mensaje:
+
+- Verifica que pertenece a la sesión activa
+- Extrae:
+  - MAC UWB del reloj
+  - Anchor
+- Marca la sesión como "prepared"
+
+---
+
+3.5 Lanzamiento del ranging
+
+La Raspberry ejecuta:
+
+run_fira_twr.py --mac <MY_MAC> --dest-mac <WATCH_MAC>
+
+---
+
+3.6 Procesado de datos
+
+- Se parsea la salida del script
+- Se extraen bloques de:
+  - distancia
+  - RSSI
+  - estado
+- Se guardan en un archivo TSV con formato:
+
+timestamp | session_id | watch_id | anchor | watch_mac | distance | rssi
+
+---
+
+3.7 Finalización
+
+- Se envía al reloj:
+  {"action":"stop"}
+
+- Se marca la sesión como completada
+
+---
+
+------------------------------------------------------------
+4. FUNCIONAMIENTO DE run_fira_twr.py (EJECUTOR UWB)
+------------------------------------------------------------
+
+Este script se encarga de la comunicación directa con la placa UWB.
+
+---
+
+4.1 Inicialización
+
+- Abre el puerto serie (/dev/ttyACM0)
+- Inicializa la interfaz UCI
+- Resetea el dispositivo UWB
+
+---
+
+4.2 Configuración de la sesión
+
+Configura parámetros FiRa:
+
+- MAC local (placa)
+- MAC destino (reloj)
+- Canal UWB
+- Claves STS
+- Tipo de sesión (DS-TWR)
+- Rol (controller o controlee)
+
+---
+
+4.3 Inicio del ranging
+
+- Crea la sesión
+- Aplica la configuración
+- Inicia el ranging
+
+Durante esta fase:
+- Se reciben mediciones continuas
+
+---
+
+4.4 Duración
+
+- El ranging se mantiene durante el tiempo especificado (-t)
+- Se generan múltiples mediciones
+
+---
+
+4.5 Salida de datos
+
+Se imprimen bloques como:
+
+# Ranging Data:
+status: Ok
+distance: XXX cm
+rssi: XXX dBm
+
+---
+
+4.6 Finalización
+
+- Se detiene el ranging
+- Se elimina la sesión
+- Se libera el hardware
+
+---
+
+------------------------------------------------------------
+5. RELACIÓN ENTRE AMBOS PROGRAMAS
+------------------------------------------------------------
+
+mqtt_uwb_v2.py decide CUÁNDO medir  
+run_fira_twr.py ejecuta CÓMO medir  
+
+Flujo conjunto:
+
+1. mqtt_uwb crea sesión
+2. envía orden al reloj
+3. recibe MAC del reloj
+4. lanza run_fira_twr.py
+5. run_fira_twr ejecuta ranging
+6. mqtt_uwb procesa y guarda datos
+
+---
+
+------------------------------------------------------------
+6. CONCEPTO CLAVE DEL SISTEMA
+------------------------------------------------------------
+
+La MAC UWB del reloj NO es fija.
+
+Cada sesión sigue este flujo:
+
+prepare → generar MAC → publicar → usar → descartar
+
+Por tanto:
+
+- watch_id → identificador fijo
+- uwb_mac → identificador temporal de sesión
+
+---
+
+------------------------------------------------------------
+7. TOPICS MQTT
+------------------------------------------------------------
+
+Reloj → Raspberry:
+
+- uwb/presence/<watch_id>
+- uwb/session/<watch_id>
+
+Raspberry → Reloj:
+
+- uwb/commands/<watch_id>
+
+---
