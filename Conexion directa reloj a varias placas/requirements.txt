@@ -1,3 +1,2 @@
 pyserial
 colorama
-paho-mqtt
