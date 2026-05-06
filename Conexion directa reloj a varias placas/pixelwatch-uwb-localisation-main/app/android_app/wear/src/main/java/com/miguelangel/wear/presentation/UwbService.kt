@@ -61,7 +61,7 @@ class UwbService : Service() {
     }
 
     private fun initMqtt() {
-        val uri = "tcp://192.168.18.23:1883"
+        val uri = "tcp://192.168.1.119:1883"
         val clientId = "wear_${System.currentTimeMillis()}"
         try {
             mqttClient = MqttClient(uri, clientId, null)
