@@ -10,7 +10,7 @@ import org.eclipse.paho.client.mqttv3.MqttMessage
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
 
 class MqttHelper() {
-    private val serverUri = "tcp://192.168.18.23:1883" // IP de tu Raspberry Pi
+    private val serverUri = "tcp://10.187.4.101:1883" // IP de tu Raspberry Pi
     private val clientId = "pixel_client_" + System.currentTimeMillis()
     private val mqttClient: MqttClient = MqttClient(serverUri, clientId, MemoryPersistence())
 

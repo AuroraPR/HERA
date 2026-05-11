@@ -1,14 +1,17 @@
 package com.miguelangel.wear.presentation
 
 import android.Manifest
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
+import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -25,7 +28,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
 import com.miguelangel.wear.presentation.theme.DWM3001CDKRangingTheme
 import kotlinx.coroutines.delay
 import java.io.BufferedWriter
@@ -36,7 +38,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.sqrt
 
-class MainActivity : ComponentActivity(), SensorEventListener {
+class MainActivity : ComponentActivity(), SensorEventListener, UwbService.DistanceListener {
 
     private val FG_PERMS = arrayOf(
         Manifest.permission.UWB_RANGING,
@@ -53,6 +55,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         if (allGranted) {
             Log.d("MainActivity", "Permisos concedidos")
             startUwbService()
+            bindToUwbService()
         } else {
             Toast.makeText(this, "Permisos requeridos no concedidos", Toast.LENGTH_LONG).show()
         }
@@ -72,6 +75,24 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     private var csvWriter: BufferedWriter? = null
     private var currentSecondEpoch: Long = -1L
     private val magnitudesBySensor = mutableMapOf<String, MutableList<Float>>()
+
+    private var uwbService: UwbService? = null
+    private var isBound = false
+
+    private val serviceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            val binder = service as UwbService.LocalBinder
+            uwbService = binder.getService()
+            uwbService?.setDistanceListener(this@MainActivity)
+            isBound = true
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            uwbService?.setDistanceListener(null)
+            uwbService = null
+            isBound = false
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -119,9 +140,21 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     }
 
     override fun onDestroy() {
+        super.onDestroy()
+        if (isBound) {
+            uwbService?.setDistanceListener(null)
+            unbindService(serviceConnection)
+            isBound = false
+        }
         unregisterAllSensors()
         closeWriterSafely()
-        super.onDestroy()
+    }
+
+    // Implementación del listener de distancias
+    override fun onDistanceReceived(timestampMs: Long, distanceCm: Double, rssi: Double, mac: String) {
+        if (isRecording) {
+            appendDistanceLine(timestampMs, distanceCm, mac, rssi)
+        }
     }
 
     private fun registerAvailableSensors() {
@@ -144,7 +177,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 
         try {
             csvWriter = BufferedWriter(FileWriter(outputFile, false)).apply {
-                write("timestamp_ns,sensor,label,x,y,z,w,accuracy\n")
+                write("timestamp,sensor,label,valor\n")   // <--- NUEVA CABECERA
                 flush()
             }
             isRecording = true
@@ -155,7 +188,6 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             statusText = "Error"
         }
     }
-
     private fun stopRecording() {
         flushSecondMedians(force = true)
         isRecording = false
@@ -175,7 +207,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 
     override fun onSensorChanged(event: SensorEvent) {
         val sensorName = sensorTypeToName(event.sensor.type) ?: return
-        val timestampNs = event.timestamp
+        val timestampMs = System.currentTimeMillis()
 
         val nowMillis = System.currentTimeMillis()
         val secondEpoch = nowMillis / 1000L
@@ -196,13 +228,46 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 
         if (isRecording) {
             when (event.sensor.type) {
-                Sensor.TYPE_ACCELEROMETER -> appendCsvLine(timestampNs, "acc", currentLabel, x, y, z, null, null)
-                Sensor.TYPE_GYROSCOPE -> appendCsvLine(timestampNs, "gyr", currentLabel, x, y, z, null, null)
-                Sensor.TYPE_MAGNETIC_FIELD -> appendCsvLine(timestampNs, "mag", currentLabel, x, y, z, null, null)
+                Sensor.TYPE_ACCELEROMETER -> {
+                    val values = listOf(
+                        "acc_x" to event.values[0],
+                        "acc_y" to event.values[1],
+                        "acc_z" to event.values[2]
+                    )
+                    appendSensorValues(timestampMs, values, currentLabel)
+                }
+                Sensor.TYPE_GYROSCOPE -> {
+                    val values = listOf(
+                        "gyr_x" to event.values[0],
+                        "gyr_y" to event.values[1],
+                        "gyr_z" to event.values[2]
+                    )
+                    appendSensorValues(timestampMs, values, currentLabel)
+                }
+                Sensor.TYPE_MAGNETIC_FIELD -> {
+                    val values = listOf(
+                        "mag_x" to event.values[0],
+                        "mag_y" to event.values[1],
+                        "mag_z" to event.values[2]
+                    )
+                    appendSensorValues(timestampMs, values, currentLabel)
+                }
                 Sensor.TYPE_ROTATION_VECTOR -> {
+                    val x = event.values[0]
+                    val y = event.values[1]
+                    val z = event.values[2]
                     val w = event.values.getOrElse(3) { 0f }
                     val accuracy = if (event.values.size > 4) event.values[4] else Float.NaN
-                    appendCsvLine(timestampNs, "rot", currentLabel, x, y, z, w, accuracy)
+                    val values = mutableListOf(
+                        "rot_x" to x,
+                        "rot_y" to y,
+                        "rot_z" to z,
+                        "rot_w" to w
+                    )
+                    if (!accuracy.isNaN()) {
+                        values.add("rot_accuracy" to accuracy)
+                    }
+                    appendSensorValues(timestampMs, values, currentLabel)
                 }
             }
         }
@@ -210,15 +275,43 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
 
-    private fun appendCsvLine(timestampNs: Long, sensor: String, label: String,
-                              x: Float, y: Float, z: Float, w: Float?, accuracy: Float?) {
-        val wStr = w?.toString() ?: ""
-        val accStr = if (accuracy != null && !accuracy.isNaN()) accuracy.toString() else ""
-        val row = "$timestampNs,$sensor,$label,$x,$y,$z,$wStr,$accStr\n"
+//    private fun appendCsvLine(timestampMs: Long, sensor: String, label: String,
+//                              x: Float, y: Float, z: Float, w: Float?, accuracy: Float?) {
+//        Log.d("MainActivity", "Escribiendo sensor: $sensor, timestamp: $timestampMs")
+//
+//        val wStr = w?.toString() ?: ""
+//        val accStr = if (accuracy != null && !accuracy.isNaN()) accuracy.toString() else ""
+//        val row = "$timestampMs,$sensor,$label,$x,$y,$z,$wStr,$accStr,,,\n"
+//        try {
+//            csvWriter?.write(row)
+//        } catch (_: IOException) {
+//            stopRecording()
+//        }
+//    }
+private fun appendSensorValues(timestampMs: Long, sensorValues: List<Pair<String, Float>>, label: String) {
+    for ((sensorName, value) in sensorValues) {
+        val row = "$timestampMs,$sensorName,$label,$value\n"
         try {
             csvWriter?.write(row)
         } catch (_: IOException) {
             stopRecording()
+        }
+    }
+}
+
+    private fun appendDistanceLine(timestampMs: Long, distanceCm: Double, mac: String, rssi: Double) {
+        val safeMac = mac.replace(":", "_")
+        val rows = listOf(
+            "$timestampMs,distance_$safeMac,$currentLabel,$distanceCm",
+            "$timestampMs,rssi_$safeMac,$currentLabel,$rssi"
+        )
+        try {
+            for (row in rows) {
+                csvWriter?.write(row + "\n")
+            }
+            csvWriter?.flush()
+        } catch (e: IOException) {
+            Log.e("MainActivity", "Error writing distance line", e)
         }
     }
 
@@ -289,7 +382,12 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     private fun startUwbService() {
         startForegroundService(Intent(this, UwbService::class.java))
     }
+
+    private fun bindToUwbService() {
+        bindService(Intent(this, UwbService::class.java), serviceConnection, Context.BIND_AUTO_CREATE)
+    }
 }
+
 
 @Composable
 fun MainWearUi(

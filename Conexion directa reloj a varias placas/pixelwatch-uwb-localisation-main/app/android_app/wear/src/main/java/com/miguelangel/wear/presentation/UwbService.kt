@@ -1,45 +1,50 @@
 package com.miguelangel.wear.presentation
 
 import android.app.*
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.os.IBinder
-import android.os.PowerManager
+import android.content.*
+import android.os.*
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import androidx.core.uwb.*
+import androidx.core.uwb.UwbManager
 import eu.sasodoma.dwm3001cdkranging.UWBRanging
 import kotlinx.coroutines.*
 import org.eclipse.paho.client.mqttv3.*
-import java.util.*
-import android.net.wifi.WifiManager
-import android.net.wifi.ScanResult
-import org.eclipse.paho.android.service.MqttAndroidClient
+import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
+import org.json.JSONObject
 import android.os.BatteryManager
-
 
 class UwbService : Service() {
 
-    private val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    private val coroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private lateinit var wakeLock: PowerManager.WakeLock
-    private lateinit var mqttClient: MqttClient
+    private lateinit var mqttClient: MqttAsyncClient
     private lateinit var uwbRanging: UWBRanging
     private var localMac: String = "--:--"
 
+    private var distanceListener: DistanceListener? = null
+    private val binder = LocalBinder()
+
+    private var isMqttConnected = false
+
+    inner class LocalBinder : Binder() {
+        fun getService(): UwbService = this@UwbService
+    }
+
+    interface DistanceListener {
+        fun onDistanceReceived(timestampMs: Long, distanceCm: Double, rssi: Double, mac: String)
+    }
+
+    override fun onBind(intent: Intent?): IBinder = binder
+
     override fun onCreate() {
         super.onCreate()
-        Log.d("UwbService", "Servicio creado")
         startForegroundNotification()
         acquireWakeLock()
         initMqtt()
 
-        // Inicializamos UWB y capturamos la MAC local
         val uwbManager = UwbManager.createInstance(this)
         uwbRanging = UWBRanging(uwbManager) { mac ->
             localMac = mac
-            Log.d("UwbService", "MAC local actualizada: $mac")
         }
 
         startUwbLoop()
@@ -50,9 +55,20 @@ class UwbService : Service() {
         coroutineScope.cancel()
         if (::wakeLock.isInitialized && wakeLock.isHeld) wakeLock.release()
         uwbRanging.stopRanging()
+        if (::mqttClient.isInitialized && isMqttConnected) {
+            try {
+                mqttClient.disconnect()
+                mqttClient.close()
+            } catch (e: MqttException) {
+                Log.e("MQTT", "Error disconnecting", e)
+            }
+        }
+        distanceListener = null
     }
 
-    override fun onBind(intent: Intent?): IBinder? = null
+    fun setDistanceListener(listener: DistanceListener?) {
+        distanceListener = listener
+    }
 
     private fun acquireWakeLock() {
         val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
@@ -61,53 +77,99 @@ class UwbService : Service() {
     }
 
     private fun initMqtt() {
-        val uri = "tcp://192.168.1.119:1883"
+        val uri = "tcp://10.187.4.101:1883"
         val clientId = "wear_${System.currentTimeMillis()}"
+        val persistence = MemoryPersistence()
+
         try {
-            mqttClient = MqttClient(uri, clientId, null)
-            mqttClient.connect()
-            Log.d("MQTT", "Conectado al broker")
+            mqttClient = MqttAsyncClient(uri, clientId, persistence)
+            val options = MqttConnectOptions().apply {
+                isAutomaticReconnect = true
+                connectionTimeout = 10
+                keepAliveInterval = 60
+                isCleanSession = true
+            }
+
+            mqttClient.setCallback(object : MqttCallback {
+                override fun connectionLost(cause: Throwable?) {
+                    Log.e("MQTT", "Conexión perdida", cause)
+                    isMqttConnected = false
+                }
+
+                override fun messageArrived(topic: String?, message: MqttMessage?) {
+                    Log.d("MQTT", "Mensaje recibido en tópico: $topic")
+                    if (topic == "uwb/distance" && message != null) {
+                        val payload = String(message.payload)
+                        Log.d("MQTT", "Payload: $payload")
+                        try {
+                            val json = JSONObject(payload)
+                            val ts = json.getLong("ts_epoch_ms")
+                            val distance = json.getDouble("distance_cm")
+                            val rssi = json.getDouble("rssi_dbm")
+                            val mac = json.getString("mac")
+                            Log.d("MQTT", "Distancia parseada: ${distance}cm, mac=$mac")
+                            Handler(Looper.getMainLooper()).post {
+                                distanceListener?.onDistanceReceived(ts, distance, rssi, mac)
+                                Log.d("MQTT", "Notificado listener")
+                            }
+                        } catch (e: Exception) {
+                            Log.e("MQTT", "Error parseando JSON", e)
+                        }
+                    }
+                }
+                override fun deliveryComplete(token: IMqttDeliveryToken?) {
+                    // No necesario
+                }
+            })
+
+            mqttClient.connect(options, null, object : IMqttActionListener {
+                override fun onSuccess(asyncActionToken: IMqttToken?) {
+                    Log.d("MQTT", "Conectado al broker")
+                    isMqttConnected = true
+                    try {
+                        mqttClient.subscribe("uwb/distance", 1, null, object : IMqttActionListener {
+                            override fun onSuccess(asyncActionToken: IMqttToken?) {
+                                Log.d("MQTT", "Suscrito a uwb/distance")
+                            }
+                            override fun onFailure(asyncActionToken: IMqttToken?, exception: Throwable?) {
+                                Log.e("MQTT", "Fallo suscripción", exception)
+                            }
+                        })
+                    } catch (e: MqttException) {
+                        Log.e("MQTT", "Error al suscribir", e)
+                    }
+                }
+
+                override fun onFailure(asyncActionToken: IMqttToken?, exception: Throwable?) {
+                    Log.e("MQTT", "Fallo de conexión", exception)
+                }
+            })
         } catch (e: MqttException) {
-            Log.e("MQTT", "Error MQTT: ${e.reasonCode} - ${e.message}", e)
+            Log.e("MQTT", "Error inicializando MQTT", e)
         }
     }
 
     private fun startUwbLoop() {
         coroutineScope.launch {
-            val responders = listOf("00:01", "00:02", "00:03", "00:04")
+            val responders = listOf("00:01", "00:02")
             while (isActive) {
-                // Publicar nivel de batería en su propio topic
                 val battery = readBattery()
                 publish("uwb/battery_level", battery.toString())
-                Log.d("UwbService", "Batería publicada: $battery%")
-
                 for (addr in responders) {
-                    // Publicar MAC local y responder en el mismo mensaje
-
-
                     try {
-                        val battery = readBattery()
-                        publish("uwb/battery_level", battery.toString())
-                        Log.d("UwbService", "Batería publicada: $battery%")
                         uwbRanging.prepareSession(controller = true)
                         delay(500)
                         val payload = "{\"mac\":\"$localMac\",\"responder\":\"$addr\"}"
                         publish("uwb/target_mac", payload)
-                        Log.d("UwbService", "Publicados mac y responder: mac=$localMac responder=$addr")
                         if (uwbRanging.startRanging(addr)) {
-                            Log.d("UwbService", "Ranging con $addr iniciado")
                             delay(2000)
                             uwbRanging.stopRanging()
-                            Log.d("UwbService", "Ranging con $addr detenido")
-                        } else {
-                            Log.w("UwbService", "Fallo al iniciar ranging con $addr")
                         }
                     } catch (e: Exception) {
                         Log.e("UwbService", "Error con $addr", e)
                     }
                     delay(500)
                 }
-                Log.d("UwbService", "Ciclo completo, pausa 2s")
                 delay(50000)
             }
         }
@@ -119,24 +181,29 @@ class UwbService : Service() {
     }
 
     private fun publish(topic: String, payload: String) {
-        if (::mqttClient.isInitialized && mqttClient.isConnected) {
-            mqttClient.publish(topic, MqttMessage(payload.toByteArray()))
+        if (::mqttClient.isInitialized && isMqttConnected) {
+            try {
+                val message = MqttMessage(payload.toByteArray()).apply { qos = 1 }
+                mqttClient.publish(topic, message, null, null)
+            } catch (e: MqttException) {
+                Log.e("MQTT", "Error publicando en $topic", e)
+            }
         }
     }
 
     private fun startForegroundNotification() {
-        val id = "uwb"
-        val nm = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        val channel = NotificationChannel(id, "UWB", NotificationManager.IMPORTANCE_LOW)
-        nm.createNotificationChannel(channel)
-        val notif = NotificationCompat.Builder(this, id)
+        val channelId = "uwb"
+        val channelName = "UWB Service"
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW)
+            notificationManager.createNotificationChannel(channel)
+        }
+        val notification = NotificationCompat.Builder(this, channelId)
             .setContentTitle("UWB Service")
             .setContentText("Activo")
             .setSmallIcon(android.R.drawable.stat_notify_sync)
             .build()
-        startForeground(1, notif)
+        startForeground(1, notification)
     }
 }
-
-
-
