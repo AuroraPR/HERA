@@ -1,0 +1,57 @@
+{
+  "mqtt": {
+    "broker": "192.168.18.3",
+    "port": 1883
+  },
+  "orchestrator": {
+    "ranging_time": 10,
+    "prepare_timeout": 15,
+    "data_dir": "data",
+    "run_script": "run_fira_twr_backup.py",
+    "python_cmd": "python",
+    "round_robin_mode": "adaptive",
+    "anchor_positions_file": "../../../fingerprinting/data/sit_placas.csv",
+    "adaptive_scheduler": {
+      "window_seconds": 15,
+      "temporal_decay": 0.9,
+      "neighbor_scale": 0.30,
+      "temperature": 0.65,
+      "minimum_probability": 0.04
+    }
+  },
+  "boards": [
+    {
+      "anchor": "00:01",
+      "my_mac": "00:01",
+      "serial_port": "uart:socket://192.168.18.63:9000",
+      "label": "placa_1"
+    },
+    {
+      "anchor": "00:02",
+      "my_mac": "00:02",
+      "serial_port": "uart:socket://192.168.18.54:9000",
+      "label": "placa_2"
+    },
+    {
+      "anchor": "00:03",
+      "my_mac": "00:03",
+      "serial_port": "COM10",
+      "label": "placa_3"
+    }
+  ],
+  "cycle": {
+    "enabled": true,
+    "watches": [
+      "watch_01",
+      "watch_02",
+      "watch_03"
+    ],
+    "loop_interval_seconds": 1.0,
+    "launch_stagger_seconds": 0.3
+  },
+  "dashboard": {
+  "enabled": true,
+  "host": "0.0.0.0",
+  "port": 8080
+}
+}
