@@ -1,13 +1,84 @@
 # Simulación del planificador
 
-## Experimento actual: estancias y traslados entre núcleos
+## Prueba con dos personas y placas exclusivas
+
+```powershell
+python fingerprinting/simular_multiocupacion.py
+```
+
+20 semillas, 900 pasos, dos relojes, nueve placas, parejas de 1.5 m, radio
+4.11 m, W=15 y w_cercania=w_equidad=1. Una medida por reloj y paso. Las rutas
+alternan bloques de destino compartido y separado de 150 pasos, con movimiento
+continuo y ruido pequeño. Coinciden en un núcleo el 43.41% de los pasos.
+
+`choose_batch` reserva cada placa elegida dentro del lote antes de evaluar al
+siguiente reloj. Se rota el primero en cada paso: cada reloj abre 450 veces.
+Las placas ocupadas se excluyen y, si no quedan libres, se devuelve None,
+nunca una placa duplicada. El llamador debe serializar lotes y conservar las
+reservas hasta que terminen las sesiones. En esta simulación acaban cada paso.
+El orquestador real ya excluye sesiones activas y verifica la reserva bajo
+lock al iniciar una sesión; esta prueba no añade latencia de hardware.
+
+| Política / reloj | Con distancia | Alternancia | Con distancia al coincidir |
+| --- | ---: | ---: | ---: |
+| Heurística / reloj 1 | 62.38% | 87.46% | 60.16% |
+| Heurística / reloj 2 | 62.01% | 87.37% | 59.89% |
+| Uniforme exclusiva / reloj 1 | 36.12% | 88.80% | 33.14% |
+| Uniforme exclusiva / reloj 2 | 35.69% | 88.85% | 33.11% |
+
+Cero asignaciones duplicadas en los 18000 pasos conjuntos (36000 asignaciones)
+de cada política. Se comprueba la exclusividad en cada paso, una celda finita
+por reloj y slice, y W=15. Prueba unitaria adversarial: 1000 lotes con ambos
+relojes prefiriendo la misma placa, reservas externas y escasez de placas.
+Los porcentajes condicionados a coincidencia son medias por recorrido.
+Resultados: resultados_multi.json y multi.html; el experimento de un reloj
+se conserva en resultados.json y replay.html.
+
+## Prueba de un reloj
+
+Configuración activa: `w_cercania=1` y `w_equidad=1`, con alternancia suave.
+Los fallos se representan como `D_Max` en M, sin memoria adicional de fallos.
+Los resultados guardados corresponden al modelo corregido: una selección y
+una sola medida por paso, W=15, 20 recorridos de 900 pasos (18000 intentos).
+Cada paso añade una slice; las otras placas quedan en NaN. Los NaN se excluyen
+de las medias ponderadas; una distancia real cero se conserva. El snapshot
+JSON usa null para las desconocidas. El fallo es D_Max, no desconocido.
+
+## Experimento actual: una medida y una selección por paso
+
+```powershell
+python fingerprinting/simular_asignacion.py --layout double --movement cores --pair-spacing-m 1.5
+```
+
+Se mantienen los mismos movimientos, posiciones y radio 4.11 m: estancias
+de 60 a 120 pasos en cada núcleo y viajes a otros núcleos. Decaimiento 0.9,
+sigmoide de pendiente 4 y w_cercania=w_equidad=1. Sin latencia de hardware.
+
+| Caso | Pasos con distancia | Alternancia | En estancias | En traslados |
+| --- | ---: | ---: | ---: | ---: |
+| Sigmoide, parejas 1.5 m | 63.82% | 86.86% | 61.78% | 71.07% |
+| Sigmoide, parejas 0.5 m | 65.50% | 86.72% | 63.48% | 72.55% |
+| Potencia 1/4, parejas 1.5 m | 64.41% | 86.32% | 62.27% | 71.90% |
+| Uniforme, parejas 1.5 m | 37.57% | 89.37% | 33.54% | 51.69% |
+
+La sigmoide con parejas 1.5 m registra 6512 intentos sin distancia entre
+18000 (36.18%). Repite placa el 13.14% de las transiciones. Se comprueba en
+cada paso que solo una celda de la slice del reloj es finita y que M conserva
+15 slices. Elegir una placa por paso hace que los porcentajes de intentos con
+distancia y pasos con distancia sean iguales.
+
+Los resultados históricos siguientes mantenían la placa durante 10 pasos;
+no evaluaban el modelo solicitado y no son comparaciones entre pesos válidas
+para este modelo corregido.
+
+## Histórico: estancias y traslados con sesiones de 10 pasos
 
 ```powershell
 python fingerprinting/simular_asignacion.py --layout double --movement cores --pair-spacing-m 1.5
 ```
 
 La función base del orquestador y del planificador es ahora `sigmoid`, con
-pendiente 4 y w_cercania=2 (w_equidad=1). La potencia 1/4 se conserva como comparación.
+pendiente 4 y w_cercania=1 (w_equidad=1). La potencia 1/4 se conserva como comparación.
 La separación de cada pareja pasa de 0.5 a 1.5 metros. El radio se ajusta a
 4.11 m: sqrt(3.25²+2.5²)=4.1003 m certifica que en cada cuadrante hay al
 menos dos placas alcanzables para todo punto del cuadrante.
@@ -18,6 +89,13 @@ Después elige otro núcleo y viaja a aproximadamente 0.2 m/s con pequeño
 ruido lateral. Los recorridos son continuos, con pasos inferiores a 0.025
 unidades normalizadas; no se teletransporta. Todos los modelos usan los
 mismos 20 recorridos de 900 segundos. Las sesiones siguen durando 10 segundos.
+
+La equidad ahora es un bonus condicionado por la cercanía:
+`score = cercania * (w_cercania + w_equidad * equidad) / (w_cercania + w_equidad)`.
+El crédito de espera se multiplica por `1 - carga`. La carga es una media
+exponencial de selecciones por reloj y placa; por decisión se actualiza con
+`alpha=2/(W+1)`: sube al repetir y decae al elegir otras placas. No hay veto
+ni cupo de alternancia y se mantiene el suelo de aceptación de 0.1.
 
 La alternancia mide el porcentaje de decisiones consecutivas que eligen
 placas distintas: cambios / (decisiones - 1). «Repite placa» es su complemento.
@@ -30,9 +108,9 @@ MISMO movimiento para aislar el cambio de separación.
 
 | Caso | Segundos conectados | En estancias | En traslados | Distancia extra |
 | --- | ---: | ---: | ---: | ---: |
-| Sigmoide w=2, separación 1.5 m | 46.17% | 42.85% | 57.84% | 3.01 m |
-| Sigmoide w=2, separación 0.5 m | 49.43% | 46.34% | 60.11% | 3.13 m |
-| Potencia 1/4 w=2, separación 1.5 m | 43.31% | 40.17% | 54.08% | 3.13 m |
+| Sigmoide w=1, separación 1.5 m | 48.23% | 44.69% | 60.86% | 2.87 m |
+| Sigmoide w=1, separación 0.5 m | 49.06% | 46.04% | 59.71% | 3.09 m |
+| Potencia 1/4 w=1, separación 1.5 m | 44.82% | 41.41% | 56.96% | 3.11 m |
 | Uniforme, separación 1.5 m | 38.43% | 34.59% | 52.18% | 3.44 m |
 
 La cobertura ideal con sesiones de 10 segundos es del 100% en estos
@@ -44,7 +122,17 @@ reconstruir el porcentaje total. Cambiar radio y movimiento impide comparar
 directamente con los experimentos antiguos de paseo aleatorio.
 
 Con idéntico movimiento, radio 4.11 m y separación 1.5 m, el experimento
-anterior con w=5 obtuvo 48.83% de tiempo conectado; bajar a w=2 da 46.17%.
+anterior con w=5 obtuvo 48.83% de tiempo conectado; bajar a w=2 daba 46.17%
+con la equidad anterior. La equidad suave actual eleva ese 46.17% a 49.11%.
+Los intentos sin distancia inicial bajan de 953/1800 (52.94%) a 909/1800
+(50.50%). La alternancia pasa de 93.93% a 92.70%; las repeticiones son
+130/1780 (7.30%). Es una comparación de simulación sobre las mismas semillas,
+sin latencia de conexión; no representa todavía una prueba de hardware.
+
+Con la misma equidad suave, bajar w_cercania de 2 a 1 reduce el tiempo con
+datos de 49.11% a 48.23%. Los intentos sin distancia inicial suben de
+909/1800 (50.50%) a 922/1800 (51.22%). La alternancia sube de 92.70% a
+93.88%; las repeticiones bajan de 130/1780 a 109/1780 (6.12%).
 
 ## Experimento anterior: doble cobertura
 

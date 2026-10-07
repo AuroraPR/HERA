@@ -1,9 +1,9 @@
 """Política de selección UWB basada en vecindad, historial y equidad.
 
 La matriz M se guarda como ``history[segundo][reloj][anchor]``. Cada celda es
-la mediana de distancia de ese segundo, D_max si el intento falló y 0 si todavía
-no hubo un intento para esa pareja en ese segundo. El 0 es neutral: evita que
-la ausencia inevitable de medidas en un protocolo 1-a-1 parezca un fallo.
+la mediana de distancia de ese segundo, D_max si el intento falló y NaN si
+no hubo un intento para esa pareja en ese segundo. Las celdas desconocidas
+no entran en las medias. En el snapshot JSON se exportan como null.
 """
 from __future__ import annotations
 
@@ -58,7 +58,7 @@ class AdaptiveAnchorScheduler:
         evidence_transform: str = "sigmoid",
         sigmoid_slope: float = 4.0,
         proximity_weight: float = 1.0,
-        fairness_weight: float = 0.65,
+        fairness_weight: float = 1.0,
         history_aggregation: str = "per_anchor",
     ) -> None:
         if window_seconds < 1:
@@ -106,16 +106,17 @@ class AdaptiveAnchorScheduler:
         self._current_slice: dict[str, dict[str, float]] = {}
         self._samples: dict[tuple[int, str, str], list[float]] = {}
         self._last_selected: dict[str, dict[str, int]] = {}
+        self._selection_load: dict[str, dict[str, float]] = {}
         self._rng = random.Random(random_seed)
 
     def _empty_slice(self, watches: Iterable[str] = ()) -> dict[str, dict[str, float]]:
-        return {watch_id: {anchor: 0.0 for anchor in self.anchors} for watch_id in watches}
+        return {watch_id: {anchor: math.nan for anchor in self.anchors} for watch_id in watches}
 
     def _ensure_watch(self, watch_id: str) -> None:
         if watch_id not in self._current_slice:
-            self._current_slice[watch_id] = {anchor: 0.0 for anchor in self.anchors}
+            self._current_slice[watch_id] = {anchor: math.nan for anchor in self.anchors}
         for slice_ in self.history:
-            slice_.setdefault(watch_id, {anchor: 0.0 for anchor in self.anchors})
+            slice_.setdefault(watch_id, {anchor: math.nan for anchor in self.anchors})
         self._last_selected.setdefault(watch_id, {})
 
     def _advance(self, now: float) -> None:
@@ -189,9 +190,8 @@ class AdaptiveAnchorScheduler:
             spatial_total = {anchor: 0.0 for anchor in self.anchors}
             spatial_evidence = {anchor: 0.0 for anchor in self.anchors}
             for source, value in slice_.get(watch_id, {}).items():
-                # Un cero medido es válido; un cero sin muestras es neutral.
-                timestamp = self._current_second - age
-                if value == 0 and not self._samples.get((timestamp, watch_id, source)):
+                # Desconocida no es fallo; una distancia cero sí es válida.
+                if not math.isfinite(value):
                     continue
                 impact = 1.0 - self.normalized_distance(value) if value >= 0 else -1.0
                 for target in self.anchors:
@@ -225,6 +225,9 @@ class AdaptiveAnchorScheduler:
             waited = self.window_seconds if last is None else min(now_second - last, self.window_seconds)
             # El crédito de espera evita inanición aun cuando otro anchor tenga mucha evidencia.
             fairness = max(0.0, waited / self.window_seconds)
+            # Memoria suave por decisión: repetir acumula carga, alternar la
+            # disipa. Nunca excluye una placa y es independiente por reloj.
+            fairness *= 1 - self._selection_load.get(watch_id, {}).get(anchor, 0.0)
             signed_evidence = evidence[anchor] / temporal_total
             # La raíz amplifica la magnitud de señales débiles, conservando
             # el signo. No aplicar la raíz a probabilidades: las uniformaría.
@@ -234,9 +237,10 @@ class AdaptiveAnchorScheduler:
             else:
                 boosted = math.copysign(abs(signed_evidence) ** self.evidence_power, signed_evidence)
             proximity = (1.0 + boosted) / 2.0
-            # Media ponderada: tanto la heurística como las probabilidades
-            # quedan en [0, 1], incluidos fallos y ausencia de observaciones.
-            scores[anchor] = (self.proximity_weight * proximity + self.fairness_weight * fairness) / (self.proximity_weight + self.fairness_weight)
+            # Equidad condicionada por cercanía: esperar no compensa por sí
+            # solo una mala distancia. Una placa buena conserva su término
+            # principal aunque acabe de seleccionarse; alternar es un bonus.
+            scores[anchor] = proximity * (self.proximity_weight + self.fairness_weight * fairness) / (self.proximity_weight + self.fairness_weight)
         return scores
 
     def _pair_estimates(self, watch_id: str) -> dict[str, dict[str, float]]:
@@ -251,7 +255,9 @@ class AdaptiveAnchorScheduler:
                 timestamp = self._current_second - age
                 if (timestamp, watch_id, anchor) not in self._samples:
                     continue
-                value = slice_.get(watch_id, {}).get(anchor, 0.0)
+                value = slice_.get(watch_id, {}).get(anchor, math.nan)
+                if not math.isfinite(value):
+                    continue
                 weight = self.temporal_decay ** age
                 weighted_distance += weight * self.normalized_distance(value)
                 total_weight += weight
@@ -307,15 +313,48 @@ class AdaptiveAnchorScheduler:
                 anchor = self._rng.choice(anchors)
                 if self._rng.random() < weights[anchor]:
                     break
-            self._last_selected.setdefault(watch_id, {})[anchor] = int(now)
+            self._remember_selection(watch_id, anchor, now)
             return anchor, probabilities
         probabilities = self.probabilities(watch_id, candidates, now)
         if not probabilities:
             return None, {}
         anchors, weights = zip(*probabilities.items())
         anchor = self._rng.choices(anchors, weights=weights, k=1)[0]
-        self._last_selected.setdefault(watch_id, {})[anchor] = int(now)
+        self._remember_selection(watch_id, anchor, now)
         return anchor, probabilities
+
+    def choose_batch(self, watch_ids: Iterable[str], candidates: Iterable[str],
+                     now: float | None = None, occupied: Iterable[str] = (),
+                     first_index: int = 0) -> dict[str, tuple[str | None, dict[str, float]]]:
+        """Asigna un lote sin compartir placas; sin libres devuelve None.
+
+        Reserva cada elección antes de evaluar el siguiente reloj. El llamador
+        debe serializar los lotes y pasar las reservas de sesiones activas.
+        first_index permite rotar quién elige primero sin alterar la heurística.
+        """
+        now = time.time() if now is None else now
+        watches = list(dict.fromkeys(watch_ids))
+        if not watches:
+            return {}
+        offset = first_index % len(watches)
+        watches = watches[offset:] + watches[:offset]
+        reserved = {canonical_anchor(a) for a in occupied}
+        free = list(dict.fromkeys(canonical_anchor(a) for a in candidates
+                                  if canonical_anchor(a) in self.anchors and canonical_anchor(a) not in reserved))
+        result = {}
+        for watch in watches:
+            anchor, probabilities = self.choose(watch, free, now)
+            result[watch] = (anchor, probabilities)
+            if anchor is not None:
+                free.remove(anchor)
+        return result
+
+    def _remember_selection(self, watch_id: str, anchor: str, now: float) -> None:
+        self._last_selected.setdefault(watch_id, {})[anchor] = int(now)
+        load = self._selection_load.setdefault(watch_id, {})
+        rate = 2 / (self.window_seconds + 1)
+        for candidate in self.anchors:
+            load[candidate] = (1 - rate) * load.get(candidate, 0.0) + rate * (candidate == anchor)
 
     def snapshot(self) -> dict:
         """Estado JSON seguro para observación y depuración del planificador."""
@@ -331,9 +370,13 @@ class AdaptiveAnchorScheduler:
             "proximity_weight": self.proximity_weight,
             "fairness_weight": self.fairness_weight,
             "history_aggregation": self.history_aggregation,
+            "selection_load_by_watch": copy.deepcopy(self._selection_load),
             "estimates_by_watch": {watch: self._pair_estimates(watch) for watch in self._current_slice},
             "timestamps": list(range(self._current_second - self.window_seconds + 1, self._current_second + 1)) if self._current_second is not None else [],
             "temporal_weights": [self.temporal_decay ** age for age in reversed(range(self.window_seconds))],
             "anchors": self.anchors,
-            "history": copy.deepcopy(list(self.history) + ([self._current_slice] if self._current_second is not None else [])),
+            "history": [{watch: {anchor: value if math.isfinite(value) else None
+                                  for anchor, value in row.items()}
+                         for watch, row in slice_.items()}
+                        for slice_ in list(self.history) + ([self._current_slice] if self._current_second is not None else [])],
         }

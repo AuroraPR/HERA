@@ -1,4 +1,6 @@
 import unittest
+import math
+import json
 from collections import Counter
 
 from adaptive_scheduler import AdaptiveAnchorScheduler
@@ -18,7 +20,7 @@ class SlidingWindowTests(unittest.TestCase):
         self.assertEqual(snapshot["history"][0]["watch"]["A"], 10)
         scheduler.record("watch", "B", [30], now=115)
         self.assertEqual(scheduler.snapshot()["timestamps"], list(range(101, 116)))
-        self.assertTrue(all(slice_["watch"]["A"] == 0 for slice_ in scheduler.snapshot()["history"]))
+        self.assertTrue(all(slice_["watch"]["A"] is None for slice_ in scheduler.snapshot()["history"]))
 
     def test_temporal_weights_and_late_samples(self):
         scheduler = self.scheduler()
@@ -26,7 +28,7 @@ class SlidingWindowTests(unittest.TestCase):
         scheduler.record("watch", "B", [10], now=101)
         # Igual distancia: el segundo reciente pesa más por el factor 0.9.
         scores = scheduler._scores("watch", 101)
-        self.assertAlmostEqual(scores["B"] - scores["A"], (0.98 ** .5 - (0.98 * .9) ** .5) / 2 / 1.65)
+        self.assertAlmostEqual(scores["B"] - scores["A"], (0.98 ** .5 - (0.98 * .9) ** .5) / 2)
         scheduler.record("watch", "A", [20, 30, 40], now=100.8)
         snapshot = scheduler.snapshot()
         self.assertEqual(snapshot["history"][-2]["watch"]["A"], 25)
@@ -42,7 +44,7 @@ class SlidingWindowTests(unittest.TestCase):
         snapshot = scheduler.snapshot()
         self.assertEqual(len(snapshot["history"]), 15)
         self.assertEqual(snapshot["timestamps"], list(range(186, 201)))
-        self.assertTrue(all(slice_["watch"]["A"] == 0 for slice_ in snapshot["history"]))
+        self.assertTrue(all(slice_["watch"]["A"] is None for slice_ in snapshot["history"]))
         self.assertEqual(snapshot["history"][-1]["watch"]["B"], 1000)
 
     def test_single_second_window(self):
@@ -50,7 +52,19 @@ class SlidingWindowTests(unittest.TestCase):
         scheduler.record("watch", "A", [10], now=100)
         scheduler.record("watch", "B", [20], now=101)
         self.assertEqual(len(scheduler.snapshot()["history"]), 1)
-        self.assertEqual(scheduler.snapshot()["history"][0]["watch"]["A"], 0)
+        self.assertIsNone(scheduler.snapshot()["history"][0]["watch"]["A"])
+
+    def test_unknown_is_nan_and_zero_is_a_valid_measurement(self):
+        scheduler = self.scheduler()
+        scheduler.record("watch", "A", [0], now=100)
+        self.assertTrue(math.isnan(scheduler._current_slice["watch"]["B"]))
+        self.assertEqual(scheduler._pair_estimates("watch")["A"]["normalized_distance"], 0)
+        self.assertNotIn("B", scheduler._pair_estimates("watch"))
+        scheduler.record("watch", "B", [-1], now=101)
+        self.assertEqual(scheduler._current_slice["watch"]["B"], 1000)
+        self.assertTrue(math.isnan(scheduler._current_slice["watch"]["A"]))
+        self.assertEqual(scheduler._pair_estimates("watch")["A"]["observed_slices"], 1)
+        json.dumps(scheduler.snapshot(), allow_nan=False)
 
     def test_normalized_distance_and_priority(self):
         scheduler = self.scheduler(window=1)
@@ -116,6 +130,42 @@ class SlidingWindowTests(unittest.TestCase):
         self.assertGreater(scores["A"], scores["B"])
         self.assertTrue(all(0 <= score <= 1 for score in scores.values()))
 
+
+    def test_soft_alternation_preserves_good_repeats_and_recovers(self):
+        scheduler = AdaptiveAnchorScheduler(["A", "B", "C"], {}, proximity_weight=2, fairness_weight=1)
+        scheduler.record("watch", "A", [100], now=100)
+        scheduler.record("watch", "B", [100], now=100)
+        scheduler.record("watch", "C", [], now=100)
+        scheduler.choose("watch", ["A"], now=100)
+        first = scheduler._scores("watch", 110)
+        for _ in range(12):
+            scheduler.choose("watch", ["A"], now=100)
+        repeated = scheduler._scores("watch", 110)
+        self.assertLess(repeated["A"], first["A"])
+        self.assertGreater(repeated["A"], repeated["C"])
+        self.assertGreater(repeated["B"], repeated["A"])
+        self.assertGreater(scheduler.probabilities("watch", ["A", "B", "C"], 110)["A"], 0)
+        for _ in range(12):
+            scheduler.choose("watch", ["B"], now=100)
+        self.assertGreater(scheduler._scores("watch", 110)["A"], repeated["A"])
+        scheduler.record("other", "A", [100], now=110)
+        self.assertNotIn("other", scheduler._selection_load)
+
+    def test_batch_never_shares_even_when_every_watch_prefers_same_anchor(self):
+        scheduler = AdaptiveAnchorScheduler(["A", "B", "C"], {}, random_seed=3)
+        scheduler._scores = lambda watch, now: {"A": 1, "B": .1, "C": 0}
+        for step in range(1000):
+            result = scheduler.choose_batch(["w1", "w2"], ["A", "A", "B", "C"],
+                                            now=step, occupied=["C"], first_index=step)
+            chosen = [a for a, _ in result.values()]
+            self.assertEqual(set(chosen), {"A", "B"})
+            first = next(iter(result))
+            self.assertEqual(first, "w1" if step % 2 == 0 else "w2")
+            second = list(result)[1]
+            self.assertNotIn(result[first][0], result[second][1])
+        scarce = scheduler.choose_batch(["w1", "w2"], ["A"], now=1001)
+        self.assertEqual(scarce["w2"], (None, {}))
+        self.assertEqual(scheduler.choose_batch(["w1"], ["A"], occupied=["A"])["w1"], (None, {}))
 
     def test_full_matrix_weighted_estimate_includes_failure(self):
         scheduler = self.scheduler()

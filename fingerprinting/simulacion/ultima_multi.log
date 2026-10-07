@@ -1,0 +1,48 @@
+{
+  "adaptive": {
+    "collisions": 0,
+    "shared_steps": 390.65,
+    "shared_percent": 43.40555555555555,
+    "both_data_percent": 37.65,
+    "both_data_when_shared_percent": 32.66469672765757,
+    "watch_01": {
+      "data_percent": 62.37777777777778,
+      "no_data_count": 338.6,
+      "alternation_percent": 87.45828698553949,
+      "shared_data_percent": 60.15740056775401,
+      "separate_data_percent": 64.06552469994352,
+      "first_count": 450
+    },
+    "watch_02": {
+      "data_percent": 62.00555555555556,
+      "no_data_count": 341.95,
+      "alternation_percent": 87.36929922135707,
+      "shared_data_percent": 59.89076491475774,
+      "separate_data_percent": 63.64661875276712,
+      "first_count": 450
+    }
+  },
+  "uniform": {
+    "collisions": 0,
+    "shared_steps": 390.65,
+    "shared_percent": 43.40555555555555,
+    "both_data_percent": 11.844444444444445,
+    "both_data_when_shared_percent": 8.236950173573094,
+    "watch_01": {
+      "data_percent": 36.11666666666667,
+      "no_data_count": 574.95,
+      "alternation_percent": 88.80422691879866,
+      "shared_data_percent": 33.139957649478305,
+      "separate_data_percent": 38.3873822282438,
+      "first_count": 450
+    },
+    "watch_02": {
+      "data_percent": 35.68888888888889,
+      "no_data_count": 578.8,
+      "alternation_percent": 88.85428253615127,
+      "shared_data_percent": 33.10600225391717,
+      "separate_data_percent": 37.670445557465484,
+      "first_count": 450
+    }
+  }
+}

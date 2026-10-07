@@ -4,12 +4,12 @@
     <label class="form-label">Política <select class="form-select" id="uwb-policy"><option value="adaptive">Sigmoide · parejas separadas</option><option value="previous">Sigmoide · parejas anteriores</option><option value="power">Potencia 1/4 · parejas separadas</option><option value="uniform">Uniforme · parejas separadas</option><option value="round_robin">Round-robin · parejas separadas</option></select></label>
     <button type="button" class="btn" id="uwb-play">Reproducir</button>
   </div>
-  <label class="form-label" for="uwb-time">Tiempo: <span id="uwb-second" class="tabular-nums"></span></label>
+  <label class="form-label" for="uwb-time">Paso: <span id="uwb-second" class="tabular-nums"></span></label>
   <input id="uwb-time" class="form-range" type="range" min="0" value="0" step="1">
   <svg id="uwb-map" role="img" aria-label="Posición del reloj, trayectoria, placa seleccionada y placa más cercana"></svg>
   <div id="uwb-detail" class="tabular-nums" aria-live="polite"></div>
   <div id="uwb-phase-stats" class="text-small tabular-nums"></div>
-  <table class="table table-sm"><thead><tr><th>Política · 20 recorridos</th><th>Segundos conectados</th><th>Alternancia</th><th>Repite placa</th><th>Distancia extra</th></tr></thead><tbody id="uwb-results"></tbody></table>
+  <table class="table table-sm"><thead><tr><th>Política · 20 recorridos</th><th>Pasos con distancia</th><th>Intentos sin distancia</th><th>Alternancia</th><th>Repite placa</th><th>Distancia extra</th></tr></thead><tbody id="uwb-results"></tbody></table>
 </div>
 <style>
 #uwb-simulation svg {width:100%;display:block;max-height:520px}
@@ -52,12 +52,12 @@
    svg.innerHTML+=`<rect x="${px(p[0])-5}" y="${py(p[1])-5}" width="10" height="10" fill="${a===f.anchor?'var(--viz-series-1)':'var(--muted-foreground)'}"/><text x="${px(p[0])}" y="${py(p[1])+(index%2?20:-12)}" text-anchor="middle">${a.slice(-2)}</text>`;
   });
   svg.innerHTML+=`<circle cx="${px(f.x)}" cy="${py(f.y)}" r="7" fill="var(--viz-series-2)"/>`;
-  root.querySelector('#uwb-second').textContent=`${f.t} s`;
+  root.querySelector('#uwb-second').textContent=`${f.t}`;
   root.querySelector('#uwb-detail').textContent=`${f.phase==='dwell'?'Estancia':f.phase==='travel'?'Traslado':'Movimiento'}${f.target===null?'':' · N'+(f.target+1)} · Placa ${f.anchor} · ${f.distance.toFixed(2)} m · ${f.available_count} placas en radio ${data.assumptions.connection_radius_m} m · ${f.ok?'data':'NO-data'}`;
   const stats=data.results[policy.value];
   root.querySelector('#uwb-phase-stats').textContent=stats.dwell_data_percent===null?'':`Conexión en estancias: ${stats.dwell_data_percent.toFixed(1)} % · En traslados: ${stats.travel_data_percent===null?'—':stats.travel_data_percent.toFixed(1)+' %'}`;
  }
- root.querySelector('#uwb-results').innerHTML=Object.entries(data.results).map(([p,r])=>`<tr><td>${names[p]}</td><td>${r.data_percent.toFixed(1)} %</td><td>${r.alternation_percent===null?'—':r.alternation_percent.toFixed(1)+' %'}</td><td>${r.repeat_percent===null?'—':r.repeat_percent.toFixed(1)+' %'}</td><td>${r.mean_excess_distance_m.toFixed(2)} m</td></tr>`).join('');
+ root.querySelector('#uwb-results').innerHTML=Object.entries(data.results).map(([p,r])=>`<tr><td>${names[p]}</td><td>${r.data_percent.toFixed(1)} %</td><td>${(100-r.within_radius_percent).toFixed(1)} %</td><td>${r.alternation_percent===null?'—':r.alternation_percent.toFixed(1)+' %'}</td><td>${r.repeat_percent===null?'—':r.repeat_percent.toFixed(1)+' %'}</td><td>${r.mean_excess_distance_m.toFixed(2)} m</td></tr>`).join('');
  policy.addEventListener('change',()=>{draw();save()});
  time.addEventListener('input',()=>{draw();save()});
  root.querySelector('#uwb-play').addEventListener('click',()=>{

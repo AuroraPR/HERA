@@ -69,11 +69,9 @@ def generate_route(seed, seconds, mode):
 def simulate(seed, seconds, config, positions, policy="adaptive", scale_m=10, connection_radius_m=2.5, movement="random"):
     anchors = sorted(positions)
     settings = dict(config)
-    settings["proximity_weight"] = settings.pop("w_cercania", 2.0)
+    settings["proximity_weight"] = settings.pop("w_cercania", 1.0)
     settings["fairness_weight"] = settings.pop("w_equidad", 1.0)
     if policy == "previous":
-        settings["proximity_weight"] = 2.0
-        settings["fairness_weight"] = 1.0
         settings["history_aggregation"] = "per_anchor"
         settings["evidence_transform"] = "sigmoid"
     elif policy == "power":
@@ -88,20 +86,19 @@ def simulate(seed, seconds, config, positions, policy="adaptive", scale_m=10, co
     connected_distances = []
     instant_coverage = 0
     oracle_session_coverage = 0
-    block_coverage = {a: 0 for a in anchors}
     available_counts = []
     for second, (x, y, phase, target) in enumerate(generate_route(seed, seconds, movement)):
         distances = {a: scale_m * math.dist((x, y), positions[a]) for a in anchors}
         available_counts.append(sum(d <= connection_radius_m for d in distances.values()))
         ordered = sorted(anchors, key=distances.get)
-        if second % 10 == 0:
-            if policy in ("adaptive", "previous", "power"):
-                chosen, probabilities = scheduler.choose("watch_01", anchors, now=1000 + second)
-            else:
-                chosen = uniform.choice(anchors) if policy == "uniform" else anchors[(second // 10) % len(anchors)]
-                probabilities = {a: 1 / len(anchors) for a in anchors}
-            attempts.append({"second": second, "anchor": chosen, "distance_m": distances[chosen],
-                             "rank": ordered.index(chosen) + 1, "nearest_m": distances[ordered[0]]})
+        # Cada paso elige una placa y recibe exactamente una medida.
+        if policy in ("adaptive", "previous", "power"):
+            chosen, probabilities = scheduler.choose("watch_01", anchors, now=1000 + second)
+        else:
+            chosen = uniform.choice(anchors) if policy == "uniform" else anchors[second % len(anchors)]
+            probabilities = {a: 1 / len(anchors) for a in anchors}
+        attempts.append({"second": second, "anchor": chosen, "distance_m": distances[chosen],
+                         "rank": ordered.index(chosen) + 1, "nearest_m": distances[ordered[0]]})
         # Radio duro solicitado: fuera del alcance no hay conexión y la
         # heurística recibe D_max como distancia censurada, no una medida real.
         # Mismo resultado potencial por segundo/anchor en todas las políticas.
@@ -112,15 +109,11 @@ def simulate(seed, seconds, config, positions, policy="adaptive", scale_m=10, co
         nearest_distances.append(distances[ordered[0]])
         if ok:
             connected_distances.append(distances[chosen])
-        for anchor in anchors:
-            block_coverage[anchor] += distances[anchor] <= connection_radius_m
-        if (second + 1) % 10 == 0 or second == seconds - 1:
-            # Referencia ideal con el MISMO límite de una placa por sesión.
-            # Usa el futuro solo para evaluar; no se entrega al planificador.
-            oracle_session_coverage += max(block_coverage.values())
-            block_coverage = {a: 0 for a in anchors}
-        values = [max(0, distances[chosen] * 100 + radio.gauss(0, 8)) for _ in range(3)] if ok else [100 * config.get("max_distance_m", 10.0)]
+        oracle_session_coverage += distances[ordered[0]] <= connection_radius_m
+        values = [max(0, distances[chosen] * 100 + radio.gauss(0, 8))] if ok else [-1]
         scheduler.record("watch_01", chosen, values, now=1000 + second)
+        assert sum(math.isfinite(v) for v in scheduler._current_slice["watch_01"].values()) == 1
+        assert len(scheduler.history) + 1 == config.get("window_seconds", 15)
         assert all(0 <= value <= 1 for value in scheduler._scores("watch_01", 1000 + second).values())
         assert abs(sum(probabilities.values()) - 1) < 1e-9
         assert 0 <= x <= 1 and 0 <= y <= 1
@@ -194,7 +187,8 @@ def main():
         results[policy] = {key: mean(r[key] for r in runs if r[key] is not None) if any(r[key] is not None for r in runs) else None
                            for key in runs[0] if key != "anchor_counts"}
         results[policy]["min_available_anchors"] = min(r["min_available_anchors"] for r in runs)
-    output = {"assumptions": {"scale_m": args.scale_m, "session_seconds": 10,
+    output = {"assumptions": {"scale_m": args.scale_m, "session_seconds": 1,
+              "measurement_per_step": 1, "unknown_cells": "NaN; excluded from weighted averages",
               "seconds": args.seconds, "seeds": args.seeds, "max_step_per_axis": .025,
               "connection_radius_m": args.connection_radius_m,
               "layout": args.layout,

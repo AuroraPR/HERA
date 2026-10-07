@@ -1,0 +1,63 @@
+<div id="uwb-multi">
+  <h3>Dos personas · placas exclusivas · w=1</h3>
+  <div class="viz-controls">
+    <label class="form-label">Política <select class="form-select" id="multi-policy"><option value="adaptive">Heurística</option><option value="uniform">Uniforme con exclusión</option></select></label>
+    <button class="btn" type="button" id="multi-play">Reproducir</button>
+  </div>
+  <label class="form-label" for="multi-step">Paso <span id="multi-time" class="tabular-nums"></span></label>
+  <input class="form-range" type="range" min="0" max="899" value="0" step="1" id="multi-step">
+  <div class="viz-row"><span>● Persona 1</span><span>■ Persona 2</span></div>
+  <svg id="multi-map" role="img" aria-label="Dos personas y sus placas asignadas, siempre distintas"></svg>
+  <div id="multi-detail" aria-live="polite" class="tabular-nums"></div>
+  <div id="multi-collisions" class="tabular-nums"></div>
+  <table class="table table-sm"><thead><tr><th>Persona · 20 recorridos</th><th>Con distancia</th><th>Sin distancia</th><th>Alternancia</th><th>Con distancia al coincidir</th></tr></thead><tbody id="multi-results"></tbody></table>
+</div>
+<style>
+#uwb-multi #multi-map {width:100%;display:block;max-height:500px}
+#uwb-multi svg text {fill:var(--foreground);font-size:12px}
+#uwb-multi #multi-detail {margin:12px 0}
+</style>
+<script>
+(()=>{
+ const data=__MULTI_JSON__;
+ const root=document.getElementById('uwb-multi');
+ const el=id=>root.querySelector('#'+id);
+ const slider=el('multi-step'),policy=el('multi-policy'),svg=el('multi-map');
+ const saved=window.openai?.widgetState;
+ if(data.examples[saved?.modelContent?.policy])policy.value=saved.modelContent.policy;
+ slider.max=data.examples.adaptive.length-1;
+ slider.value=Math.max(0,Math.min(Number(slider.max),Number(saved?.privateContent?.step)||0));
+ let timer=null;
+ const save=()=>window.openai?.setWidgetState({modelContent:{policy:policy.value},privateContent:{step:Number(slider.value)}})?.catch(()=>{});
+ function draw(){
+  const frames=data.examples[policy.value],f=frames[Number(slider.value)],r=data.results[policy.value];
+  const width=Math.max(320,root.getBoundingClientRect().width),height=Math.min(width,500),margin=42;
+  const x=v=>margin+v*(width-2*margin),y=v=>margin+v*(height-2*margin);
+  svg.setAttribute('viewBox',`0 0 ${width} ${height}`);
+  svg.innerHTML=`<rect x="${margin}" y="${margin}" width="${width-2*margin}" height="${height-2*margin}" fill="none" stroke="var(--border)"/><text x="${width/2}" y="${height-8}" text-anchor="middle">X [0–1]</text><text x="5" y="22">Y [0–1]</text>`;
+  for(const [a,p] of Object.entries(data.positions))svg.innerHTML+=`<circle cx="${x(p[0])}" cy="${y(p[1])}" r="4" fill="var(--foreground)"/><text x="${x(p[0])+6}" y="${y(p[1])-8}">${a}</text>`;
+  f.people.forEach((p,i)=>{
+   const color=`var(--viz-series-${i+1})`,a=data.positions[p.anchor];
+   const trail=frames.slice(Math.max(0,f.t-60),f.t+1).map(v=>`${x(v.people[i].x)},${y(v.people[i].y)}`).join(' ');
+   svg.innerHTML+=`<polyline points="${trail}" fill="none" stroke="${color}" opacity="0.35"/><line x1="${x(p.x)}" y1="${y(p.y)}" x2="${x(a[0])}" y2="${y(a[1])}" stroke="${color}" stroke-width="2" ${p.ok?'':'stroke-dasharray="4 4"'}/>`;
+   svg.innerHTML+=i===0?`<circle cx="${x(p.x)}" cy="${y(p.y)}" r="7" fill="${color}"/>`:`<rect x="${x(p.x)-6}" y="${y(p.y)-6}" width="12" height="12" fill="${color}"/>`;
+   svg.innerHTML+=`<text x="${x(p.x)+10}" y="${y(p.y)+(i===0?-12:22)}">P${i+1}</text>`;
+  });
+  el('multi-time').textContent=f.t;
+  el('multi-detail').textContent=(f.shared?'Coinciden en núcleo':'Núcleos distintos / traslado')+' · '+f.people.map((p,i)=>`P${i+1} → ${p.anchor} · ${p.ok?'data':'NO-data'}`).join(' | ');
+  el('multi-collisions').textContent=`Placas duplicadas: ${r.collisions} · Coinciden en núcleo: ${r.shared_percent.toFixed(1)} % de pasos · Ambos con distancia al coincidir: ${r.both_data_when_shared_percent.toFixed(1)} %`;
+  el('multi-results').innerHTML=['watch_01','watch_02'].map((w,i)=>{const s=r[w];return `<tr><td>Persona ${i+1}</td><td>${s.data_percent.toFixed(2)} %</td><td>${(100-s.data_percent).toFixed(2)} %</td><td>${s.alternation_percent.toFixed(2)} %</td><td>${s.shared_data_percent.toFixed(2)} %</td></tr>`}).join('');
+ }
+ slider.addEventListener('input',()=>{draw();save()});
+ policy.addEventListener('change',()=>{draw();save()});
+ el('multi-play').addEventListener('click',()=>{
+  if(timer){clearInterval(timer);timer=null;el('multi-play').textContent='Reproducir';save();return;}
+  if(Number(slider.value)>=Number(slider.max))slider.value=0;
+  el('multi-play').textContent='Pausar';
+  timer=setInterval(()=>{slider.value=Number(slider.value)+1;draw();if(Number(slider.value)>=Number(slider.max)){clearInterval(timer);timer=null;el('multi-play').textContent='Reproducir';save()}},80);
+ });
+ window.addEventListener('openai:set_globals',e=>{const s=e.detail?.globals?.widgetState;if(data.examples[s?.modelContent?.policy])policy.value=s.modelContent.policy;if(s?.privateContent?.step!==undefined)slider.value=Math.max(0,Math.min(Number(slider.max),Number(s.privateContent.step)||0));draw()});
+ new ResizeObserver(draw).observe(root);
+ draw();
+})();
+</script>
