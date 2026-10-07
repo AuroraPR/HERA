@@ -19,6 +19,12 @@ ruido lateral. Los recorridos son continuos, con pasos inferiores a 0.025
 unidades normalizadas; no se teletransporta. Todos los modelos usan los
 mismos 20 recorridos de 900 segundos. Las sesiones siguen durando 10 segundos.
 
+La alternancia mide el porcentaje de decisiones consecutivas que eligen
+placas distintas: cambios / (decisiones - 1). «Repite placa» es su complemento.
+Se cuentan todas las asignaciones, tengan o no conexión, y se excluye la
+primera decisión porque no tiene anterior. Los segundos de una misma sesión
+no se cuentan como repeticiones. Es una métrica; no se prohíbe repetir placa.
+
 La comparación de parejas de 0.5 m conserva el MISMO radio de 4.11 m y el
 MISMO movimiento para aislar el cambio de separación.
 

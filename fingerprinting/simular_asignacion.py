@@ -130,6 +130,8 @@ def simulate(seed, seconds, config, positions, policy="adaptive", scale_m=10, co
                        "phase": phase, "target": target,
                        "rank": ordered.index(chosen) + 1})
     changes = sum(a["anchor"] != b["anchor"] for a, b in zip(attempts, attempts[1:]))
+    transitions = len(attempts) - 1
+    repeats = transitions - changes
     phase_data = {}
     for phase in ("dwell", "travel"):
         subset = [f for f in frames if f["phase"] == phase]
@@ -150,6 +152,9 @@ def simulate(seed, seconds, config, positions, policy="adaptive", scale_m=10, co
                "any_anchor_within_radius_percent": 100 * mean(a["nearest_m"] <= connection_radius_m for a in attempts),
                "changes": changes, "decisions": len(attempts),
                "change_percent": 100 * changes / max(1, len(attempts) - 1),
+               "alternation_percent": 100 * changes / transitions if transitions else None,
+               "repeat_percent": 100 * repeats / transitions if transitions else None,
+               "repeats": repeats, "transitions": transitions,
                "unique_anchors": len(set(a["anchor"] for a in attempts)),
                "anchor_counts": dict(Counter(a["anchor"] for a in attempts))}
     metrics.update(phase_data)
