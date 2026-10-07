@@ -69,10 +69,10 @@ def generate_route(seed, seconds, mode):
 def simulate(seed, seconds, config, positions, policy="adaptive", scale_m=10, connection_radius_m=2.5, movement="random"):
     anchors = sorted(positions)
     settings = dict(config)
-    settings["proximity_weight"] = settings.pop("w_cercania", 5.0)
+    settings["proximity_weight"] = settings.pop("w_cercania", 2.0)
     settings["fairness_weight"] = settings.pop("w_equidad", 1.0)
     if policy == "previous":
-        settings["proximity_weight"] = 5.0
+        settings["proximity_weight"] = 2.0
         settings["fairness_weight"] = 1.0
         settings["history_aggregation"] = "per_anchor"
         settings["evidence_transform"] = "sigmoid"

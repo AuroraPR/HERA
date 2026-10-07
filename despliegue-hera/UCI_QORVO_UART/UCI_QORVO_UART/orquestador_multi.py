@@ -291,7 +291,7 @@ class UwbOrchestratorMulti:
         adaptive_acceptance_floor: float = 0.1,
         adaptive_evidence_transform: str = "sigmoid",
         adaptive_sigmoid_slope: float = 4.0,
-        adaptive_proximity_weight: float = 5.0,
+        adaptive_proximity_weight: float = 2.0,
         adaptive_fairness_weight: float = 1.0,
         adaptive_history_aggregation: str = "per_anchor",
     ) -> None:
@@ -1150,7 +1150,7 @@ def main() -> None:
         adaptive_acceptance_floor=float(adaptive_cfg.get("acceptance_floor", 0.1)),
         adaptive_evidence_transform=str(adaptive_cfg.get("evidence_transform", "sigmoid")),
         adaptive_sigmoid_slope=float(adaptive_cfg.get("sigmoid_slope", 4.0)),
-        adaptive_proximity_weight=float(adaptive_cfg.get("w_cercania", 5.0)),
+        adaptive_proximity_weight=float(adaptive_cfg.get("w_cercania", 2.0)),
         adaptive_fairness_weight=float(adaptive_cfg.get("w_equidad", 1.0)),
         adaptive_history_aggregation=str(adaptive_cfg.get("history_aggregation", "per_anchor")),
     )

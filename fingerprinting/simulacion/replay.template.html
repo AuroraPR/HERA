@@ -1,5 +1,5 @@
 <div id="uwb-simulation">
-  <h3>Recorrido del reloj y asignación UWB</h3>
+  <h3 id="uwb-title">Recorrido del reloj y asignación UWB</h3>
   <div class="viz-controls">
     <label class="form-label">Política <select class="form-select" id="uwb-policy"><option value="adaptive">Sigmoide · parejas separadas</option><option value="previous">Sigmoide · parejas anteriores</option><option value="power">Potencia 1/4 · parejas separadas</option><option value="uniform">Uniforme · parejas separadas</option><option value="round_robin">Round-robin · parejas separadas</option></select></label>
     <button type="button" class="btn" id="uwb-play">Reproducir</button>
@@ -20,6 +20,7 @@
 (() => {
  const data=__SIMULATION_JSON__;
  const root=document.getElementById('uwb-simulation');
+ root.querySelector('#uwb-title').textContent=`Recorrido y asignación UWB · w=${data.config.w_cercania}`;
  const svg=root.querySelector('#uwb-map'), time=root.querySelector('#uwb-time'), policy=root.querySelector('#uwb-policy');
  const names={adaptive:'Sigmoide · parejas 1,5 m',previous:'Sigmoide · parejas 0,5 m',power:'Potencia · parejas 1,5 m',uniform:'Uniforme',round_robin:'Round-robin'};
  let timer=null;

@@ -1,6 +1,46 @@
 # Simulación del planificador
 
-## Experimento actual: doble cobertura
+## Experimento actual: estancias y traslados entre núcleos
+
+```powershell
+python fingerprinting/simular_asignacion.py --layout double --movement cores --pair-spacing-m 1.5
+```
+
+La función base del orquestador y del planificador es ahora `sigmoid`, con
+pendiente 4 y w_cercania=2 (w_equidad=1). La potencia 1/4 se conserva como comparación.
+La separación de cada pareja pasa de 0.5 a 1.5 metros. El radio se ajusta a
+4.11 m: sqrt(3.25²+2.5²)=4.1003 m certifica que en cada cuadrante hay al
+menos dos placas alcanzables para todo punto del cuadrante.
+
+El reloj permanece entre 60 y 120 segundos en cada núcleo (0.25/0.75 en
+ambos ejes), con pequeñas perturbaciones aleatorias y atracción al centro.
+Después elige otro núcleo y viaja a aproximadamente 0.2 m/s con pequeño
+ruido lateral. Los recorridos son continuos, con pasos inferiores a 0.025
+unidades normalizadas; no se teletransporta. Todos los modelos usan los
+mismos 20 recorridos de 900 segundos. Las sesiones siguen durando 10 segundos.
+
+La comparación de parejas de 0.5 m conserva el MISMO radio de 4.11 m y el
+MISMO movimiento para aislar el cambio de separación.
+
+| Caso | Segundos conectados | En estancias | En traslados | Distancia extra |
+| --- | ---: | ---: | ---: | ---: |
+| Sigmoide w=2, separación 1.5 m | 46.17% | 42.85% | 57.84% | 3.01 m |
+| Sigmoide w=2, separación 0.5 m | 49.43% | 46.34% | 60.11% | 3.13 m |
+| Potencia 1/4 w=2, separación 1.5 m | 43.31% | 40.17% | 54.08% | 3.13 m |
+| Uniforme, separación 1.5 m | 38.43% | 34.59% | 52.18% | 3.44 m |
+
+La cobertura ideal con sesiones de 10 segundos es del 100% en estos
+recorridos, por lo que el aprovechamiento coincide con el tiempo conectado.
+Hay como mínimo 3 placas en radio a lo largo de los recorridos concretos;
+la garantía geométrica sobre TODO el plano es de 2 placas.
+Los porcentajes de fase son medias por recorrido, no pesos con los que
+reconstruir el porcentaje total. Cambiar radio y movimiento impide comparar
+directamente con los experimentos antiguos de paseo aleatorio.
+
+Con idéntico movimiento, radio 4.11 m y separación 1.5 m, el experimento
+anterior con w=5 obtuvo 48.83% de tiempo conectado; bajar a w=2 da 46.17%.
+
+## Experimento anterior: doble cobertura
 
 ```powershell
 python fingerprinting/simular_asignacion.py --layout double
