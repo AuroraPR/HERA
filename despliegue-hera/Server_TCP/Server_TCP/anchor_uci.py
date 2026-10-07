@@ -94,7 +94,11 @@ class AnchorWorker:
         if action == "stop":
             if self.active and self.active["session_id"] == sid:
                 self.close("requested")
-            elif not self.active or sid in self.closed:
+            else:
+                # STOP may overtake START. Remember its tombstone before ACK
+                # so a delayed START cannot reopen an already released attempt.
+                if sid not in self.closed:
+                    self.closed = (self.closed + [sid])[-32:]
                 self.emit({"event": "closed", "session_id": sid, "anchor": self.anchor,
                            "watch_id": message.get("watch_id"), "already_closed": True})
             return

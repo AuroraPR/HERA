@@ -88,6 +88,20 @@ class PipelineTests(unittest.TestCase):
         self.assertIsNone(self.worker.active)
         self.assertEqual(len(self.resets), 1)
 
+    def test_stop_before_start_cannot_reopen_closed_attempt(self):
+        self.worker.command({"action": "stop", "session_id": "delayed", "watch_id": "w"})
+        self.assertEqual(self.events[-1]["event"], "closed")
+        self.worker.command({"action": "start", "session_id": "delayed", "watch_id": "w",
+                             "watch_mac": "94:FC", "uwb_session_id": 123})
+        self.assertIsNone(self.worker.active)
+        self.assertFalse(self.writes)
+        self.assertTrue(self.events[-1]["already_closed"])
+        self.start()
+        self.worker.command({"action": "stop", "session_id": "another_delayed", "watch_id": "w"})
+        self.assertEqual(self.worker.active["session_id"], "s1")
+        self.assertFalse(self.worker.active["closing"])
+        self.assertIn("another_delayed", self.worker.closed)
+
     def test_stale_stop_does_not_stop_current_and_reset_is_idempotent(self):
         self.start()
         self.worker.command({"action": "stop", "session_id": "old"})

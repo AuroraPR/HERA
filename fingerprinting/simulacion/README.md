@@ -10,10 +10,12 @@ dividiendo por la suma de pesos de W. No se escribe en otras celdas de M.
 
 20 semillas x 900 pasos x 2 personas: data 54.0667% / 53.0778%, alternancia
 91.2959% / 91.4071%, data al coincidir 51.0979% / 50.5485%, cero colisiones.
-Los archivos resultados_multi.json y multi.html muestran este experimento.
+Los archivos resultados_multi.json y multi.html se regeneran con la configuración
+actual: tras la revisión final vuelven a mostrar per_anchor, con 62.3778% /
+62.0056% de data y cero colisiones en 36000 intentos.
 La configuración de hardware conserva per_anchor (62.3778% / 62.0056% data),
 pues esta prueba empeora los resultados. replay.html conserva el experimento
-individual con per_anchor. Pasan 32 pruebas, incluida la ausencia de cambios
+individual con per_anchor. Pasan 33 pruebas, incluida la ausencia de cambios
 en slices anteriores/futuras y la simetría del premio y penalización.
 
 ## Actualización: distancias normalizadas e influencia exponencial recuperada

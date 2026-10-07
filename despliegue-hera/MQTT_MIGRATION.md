@@ -129,7 +129,7 @@ python test_adaptive_scheduler.py
 python test_mqtt_pipeline.py
 ```
 
-18 pruebas del algoritmo y 14 del protocolo: primera medida, UART dividido,
+18 pruebas del algoritmo y 15 del protocolo: primera medida, UART dividido,
 peer/handle incorrectos, timeout y reset, duplicados, STOP atrasado, recuperación,
 espera de ambos cierres, W independiente por reloj y equivalencia de puntuaciones
 con el modelo validado. La prueba completa usa dos relojes y DWM emulado en 200
@@ -137,6 +137,8 @@ intentos, con reservas exclusivas y una actualización por intento.
 Se verifica también la carga del sit_placas real y la conversión de una medida
 MQTT de 687 cm a 0.687 en M, conservando 687 cm en el log. El coordinador falla
 al iniciar si alguna placa configurada no tiene posición en ese CSV.
+Se verifica STOP antes de START: la Pico recuerda el ID cerrado e impide que
+un START atrasado reabra ese intento, también si otra sesión está activa.
 
 Pendiente de validación física: comportamiento UCI del firmware exacto de los
 DWM, GPIO de alimentación, tiempos de arranque y cancelación efectiva del
