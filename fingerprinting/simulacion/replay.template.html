@@ -1,0 +1,72 @@
+<div id="uwb-simulation">
+  <h3>Recorrido del reloj y asignación UWB</h3>
+  <div class="viz-controls">
+    <label class="form-label">Política <select class="form-select" id="uwb-policy"><option value="adaptive">Sigmoide · parejas separadas</option><option value="previous">Sigmoide · parejas anteriores</option><option value="power">Potencia 1/4 · parejas separadas</option><option value="uniform">Uniforme · parejas separadas</option><option value="round_robin">Round-robin · parejas separadas</option></select></label>
+    <button type="button" class="btn" id="uwb-play">Reproducir</button>
+  </div>
+  <label class="form-label" for="uwb-time">Tiempo: <span id="uwb-second" class="tabular-nums"></span></label>
+  <input id="uwb-time" class="form-range" type="range" min="0" value="0" step="1">
+  <svg id="uwb-map" role="img" aria-label="Posición del reloj, trayectoria, placa seleccionada y placa más cercana"></svg>
+  <div id="uwb-detail" class="tabular-nums" aria-live="polite"></div>
+  <div id="uwb-phase-stats" class="text-small tabular-nums"></div>
+  <table class="table table-sm"><thead><tr><th>Política · 20 recorridos</th><th>Segundos conectados</th><th>Cobertura aprovechada</th><th>Distancia extra</th></tr></thead><tbody id="uwb-results"></tbody></table>
+</div>
+<style>
+#uwb-simulation svg {width:100%;display:block;max-height:520px}
+#uwb-simulation svg text {fill:var(--foreground);font-size:12px}
+#uwb-simulation #uwb-detail {margin:12px 0}
+</style>
+<script>
+(() => {
+ const data=__SIMULATION_JSON__;
+ const root=document.getElementById('uwb-simulation');
+ const svg=root.querySelector('#uwb-map'), time=root.querySelector('#uwb-time'), policy=root.querySelector('#uwb-policy');
+ const names={adaptive:'Sigmoide · parejas 1,5 m',previous:'Sigmoide · parejas 0,5 m',power:'Potencia · parejas 1,5 m',uniform:'Uniforme',round_robin:'Round-robin'};
+ let timer=null;
+ const saved=window.openai?.widgetState;
+ if(saved?.modelContent?.policy && data.examples[saved.modelContent.policy]) policy.value=saved.modelContent.policy;
+ time.max=data.examples.adaptive.frames.length-1;
+ time.value=Math.min(Number(saved?.privateContent?.second)||0,Number(time.max));
+ const save=()=>window.openai?.setWidgetState({modelContent:{policy:policy.value},privateContent:{second:Number(time.value)}})?.catch(()=>{});
+ function draw(){
+  const width=Math.max(320,root.getBoundingClientRect().width), height=Math.min(width,500), margin=42;
+  svg.setAttribute('viewBox',`0 0 ${width} ${height}`);
+  const px=x=>margin+x*(width-2*margin), py=y=>margin+y*(height-2*margin);
+  const example=data.examples[policy.value], positions=example.positions||data.positions;
+  const frames=example.frames, f=frames[Number(time.value)], anchor=positions[f.anchor], nearest=positions[f.nearest];
+  const trail=frames.slice(Math.max(0,f.t-80),f.t+1).map(p=>`${px(p.x)},${py(p.y)}`).join(' ');
+  svg.innerHTML=`<rect x="${margin}" y="${margin}" width="${width-2*margin}" height="${height-2*margin}" fill="none" stroke="var(--border)"/>
+   <text x="${width/2}" y="${height-6}" text-anchor="middle">X [0–1]</text><text x="5" y="22">Y [0–1]</text>
+   <text x="${margin}" y="${height-22}">0</text><text x="${width-margin}" y="${height-22}">1</text>
+   <ellipse cx="${px(f.x)}" cy="${py(f.y)}" rx="${data.assumptions.connection_radius_m/data.assumptions.scale_m*(width-2*margin)}" ry="${data.assumptions.connection_radius_m/data.assumptions.scale_m*(height-2*margin)}" fill="none" stroke="var(--border)"/>
+   <polyline points="${trail}" fill="none" stroke="var(--muted-foreground)" opacity="0.5"/>
+   <line x1="${px(f.x)}" y1="${py(f.y)}" x2="${px(nearest[0])}" y2="${py(nearest[1])}" stroke="var(--muted-foreground)" stroke-dasharray="4 4"/>
+   <line x1="${px(f.x)}" y1="${py(f.y)}" x2="${px(anchor[0])}" y2="${py(anchor[1])}" stroke="var(--viz-series-1)" stroke-width="2"/>`;
+  if(data.assumptions.movement==='cores'){
+   [[.25,.25],[.75,.25],[.25,.75],[.75,.75]].forEach((c,i)=>{
+    svg.innerHTML+=`<circle cx="${px(c[0])}" cy="${py(c[1])}" r="14" fill="none" stroke="var(--border)"/><text x="${px(c[0])}" y="${py(c[1])+32}" text-anchor="middle">N${i+1}</text>`;
+   });
+  }
+  Object.entries(positions).forEach(([a,p],index)=>{
+   svg.innerHTML+=`<rect x="${px(p[0])-5}" y="${py(p[1])-5}" width="10" height="10" fill="${a===f.anchor?'var(--viz-series-1)':'var(--muted-foreground)'}"/><text x="${px(p[0])}" y="${py(p[1])+(index%2?20:-12)}" text-anchor="middle">${a.slice(-2)}</text>`;
+  });
+  svg.innerHTML+=`<circle cx="${px(f.x)}" cy="${py(f.y)}" r="7" fill="var(--viz-series-2)"/>`;
+  root.querySelector('#uwb-second').textContent=`${f.t} s`;
+  root.querySelector('#uwb-detail').textContent=`${f.phase==='dwell'?'Estancia':f.phase==='travel'?'Traslado':'Movimiento'}${f.target===null?'':' · N'+(f.target+1)} · Placa ${f.anchor} · ${f.distance.toFixed(2)} m · ${f.available_count} placas en radio ${data.assumptions.connection_radius_m} m · ${f.ok?'data':'NO-data'}`;
+  const stats=data.results[policy.value];
+  root.querySelector('#uwb-phase-stats').textContent=stats.dwell_data_percent===null?'':`Conexión en estancias: ${stats.dwell_data_percent.toFixed(1)} % · En traslados: ${stats.travel_data_percent===null?'—':stats.travel_data_percent.toFixed(1)+' %'}`;
+ }
+ root.querySelector('#uwb-results').innerHTML=Object.entries(data.results).map(([p,r])=>`<tr><td>${names[p]}</td><td>${r.data_percent.toFixed(1)} %</td><td>${r.coverage_efficiency_percent===null?'—':r.coverage_efficiency_percent.toFixed(1)+' %'}</td><td>${r.mean_excess_distance_m.toFixed(2)} m</td></tr>`).join('');
+ policy.addEventListener('change',()=>{draw();save()});
+ time.addEventListener('input',()=>{draw();save()});
+ root.querySelector('#uwb-play').addEventListener('click',()=>{
+  if(timer){clearInterval(timer);timer=null;root.querySelector('#uwb-play').textContent='Reproducir';save();return;}
+  if(Number(time.value)>=Number(time.max)) time.value=0;
+  root.querySelector('#uwb-play').textContent='Pausar';
+  timer=setInterval(()=>{time.value=Number(time.value)+1;draw();if(Number(time.value)>=Number(time.max)){clearInterval(timer);timer=null;root.querySelector('#uwb-play').textContent='Reproducir';save()}},80);
+ });
+ window.addEventListener('openai:set_globals',e=>{const s=e.detail?.globals?.widgetState;if(s?.modelContent?.policy&&data.examples[s.modelContent.policy])policy.value=s.modelContent.policy;if(s?.privateContent?.second!==undefined)time.value=s.privateContent.second;draw()});
+ new ResizeObserver(draw).observe(root);
+ draw();
+})();
+</script>

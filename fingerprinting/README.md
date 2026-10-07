@@ -9,6 +9,8 @@ python fingerprinting/segmentar.py
 Lee `data/20733.watch_01 (1).tsv` y descubre automáticamente todos los
 `data/escena_*.csv` y todos los identificadores de `anchor` del TSV.
 Se pueden cambiar las rutas con `--uwb`, `--escenas` y `--salida`.
+Si los CSV de escenas tienen otro nombre, usar `--patron-escenas`, por ejemplo
+`--patron-escenas "esc_*.csv"` para los ficheros de `data2`.
 Volver a ejecutar incorpora las nuevas escenas y anchors.
 
 `segmentacion.csv` contiene una fila por ventana de un segundo, concatenando

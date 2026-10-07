@@ -1,7 +1,7 @@
 """Política de selección UWB basada en vecindad, historial y equidad.
 
 La matriz M se guarda como ``history[segundo][reloj][anchor]``. Cada celda es
-la mediana de distancia de ese segundo, -1 si el intento falló y 0 si todavía
+la mediana de distancia de ese segundo, D_max si el intento falló y 0 si todavía
 no hubo un intento para esa pareja en ese segundo. El 0 es neutral: evita que
 la ausencia inevitable de medidas en un protocolo 1-a-1 parezca un fallo.
 """
@@ -51,6 +51,15 @@ class AdaptiveAnchorScheduler:
         minimum_probability: float = 0.04,
         random_seed: int | None = None,
         temporal_decay: float = 0.9,
+        max_distance_m: float = 10.0,
+        evidence_power: float = 0.5,
+        selection_mode: str = "rejection",
+        acceptance_floor: float = 0.1,
+        evidence_transform: str = "sigmoid",
+        sigmoid_slope: float = 4.0,
+        proximity_weight: float = 1.0,
+        fairness_weight: float = 0.65,
+        history_aggregation: str = "per_anchor",
     ) -> None:
         if window_seconds < 1:
             raise ValueError("window_seconds debe ser mayor o igual que 1")
@@ -59,6 +68,31 @@ class AdaptiveAnchorScheduler:
         if not 0 < temporal_decay <= 1:
             raise ValueError("temporal_decay debe estar en (0, 1]")
         self.temporal_decay = temporal_decay
+        if not math.isfinite(max_distance_m) or max_distance_m <= 0:
+            raise ValueError("max_distance_m debe ser finito y mayor que 0")
+        self.max_distance_m = max_distance_m
+        if not math.isfinite(evidence_power) or evidence_power <= 0:
+            raise ValueError("evidence_power debe ser finito y mayor que 0")
+        self.evidence_power = evidence_power
+        if selection_mode not in {"softmax", "rejection"}:
+            raise ValueError("selection_mode debe ser 'softmax' o 'rejection'")
+        if not 0 < acceptance_floor <= 1:
+            raise ValueError("acceptance_floor debe estar en (0, 1]")
+        self.selection_mode = selection_mode
+        self.acceptance_floor = acceptance_floor
+        if evidence_transform not in {"power", "sigmoid"}:
+            raise ValueError("evidence_transform debe ser 'power' o 'sigmoid'")
+        if not math.isfinite(sigmoid_slope) or sigmoid_slope <= 0:
+            raise ValueError("sigmoid_slope debe ser finito y mayor que 0")
+        self.evidence_transform = evidence_transform
+        self.sigmoid_slope = sigmoid_slope
+        if any(not math.isfinite(w) or w < 0 for w in (proximity_weight, fairness_weight)) or proximity_weight + fairness_weight <= 0:
+            raise ValueError("Los pesos deben ser finitos, no negativos y sumar más que 0")
+        self.proximity_weight = proximity_weight
+        self.fairness_weight = fairness_weight
+        if history_aggregation not in {"per_anchor", "legacy"}:
+            raise ValueError("history_aggregation debe ser 'per_anchor' o 'legacy'")
+        self.history_aggregation = history_aggregation
         self.anchors = [canonical_anchor(anchor) for anchor in anchors]
         self.positions = {canonical_anchor(key): value for key, value in positions.items()}
         self.window_seconds = window_seconds
@@ -106,13 +140,15 @@ class AdaptiveAnchorScheduler:
         self._samples = {key: values for key, values in self._samples.items() if key[0] >= cutoff}
 
     def record(self, watch_id: str, anchor: str, values: Iterable[float], now: float | None = None) -> float:
-        """Guarda la mediana válida de un intento, o -1 si no hubo medida válida."""
+        """Mediana del segundo; un intento sin distancia aporta D_max."""
         now = time.time() if now is None else now
         self._advance(now)
         self._ensure_watch(watch_id)
         anchor = canonical_anchor(anchor)
         samples = [float(value) for value in values if float(value) >= 0 and math.isfinite(float(value))]
-        distance = median(samples) if samples else -1.0
+        if not samples:
+            samples = [100 * self.max_distance_m]
+        distance = median(samples)
         second = int(now)
         age = self._current_second - second
         if anchor in self.anchors and 0 <= age < self.window_seconds:
@@ -120,9 +156,9 @@ class AdaptiveAnchorScheduler:
             key = (second, watch_id, anchor)
             accumulated = self._samples.setdefault(key, [])
             accumulated.extend(samples)
-            # Mediana de TODAS las muestras del segundo, sin mezclar -1 con
-            # distancias válidas ni calcular una mediana de medianas.
-            distance = median(accumulated) if accumulated else -1.0
+            # Mediana de todas las observaciones, incluidos los intentos
+            # fallidos representados por D_max. Nunca mediana de medianas.
+            distance = median(accumulated)
             slice_[watch_id][anchor] = distance
         return distance
 
@@ -135,20 +171,52 @@ class AdaptiveAnchorScheduler:
         distance = math.dist(first, second)
         return math.exp(-distance / self.neighbor_scale)
 
+    def normalized_distance(self, distance_cm: float) -> float:
+        """Distancia válida en [0, 1]; los marcadores -1 no son distancias."""
+        if not math.isfinite(distance_cm) or distance_cm < 0:
+            raise ValueError("Se necesita una distancia válida en centímetros")
+        return min(distance_cm / (100 * self.max_distance_m), 1.0)
+
     def _scores(self, watch_id: str, now: float) -> dict[str, float]:
         self._advance(now)
         self._ensure_watch(watch_id)
         slices = list(self.history) + [self._current_slice]
         evidence = {anchor: 0.0 for anchor in self.anchors}
+        temporal_total = sum(self.temporal_decay ** age for age in range(self.window_seconds))
         # Las muestras recientes pesan más; éxito y fallo se propagan localmente.
         for age, slice_ in enumerate(reversed(slices)):
             decay = self.temporal_decay ** age
+            spatial_total = {anchor: 0.0 for anchor in self.anchors}
+            spatial_evidence = {anchor: 0.0 for anchor in self.anchors}
             for source, value in slice_.get(watch_id, {}).items():
-                if value == 0:
+                # Un cero medido es válido; un cero sin muestras es neutral.
+                timestamp = self._current_second - age
+                if value == 0 and not self._samples.get((timestamp, watch_id, source)):
                     continue
-                impact = 1.0 if value > 0 else -1.0
+                impact = 1.0 - self.normalized_distance(value) if value >= 0 else -1.0
                 for target in self.anchors:
-                    evidence[target] += decay * impact * self._kernel(source, target)
+                    kernel = self._kernel(source, target)
+                    spatial_evidence[target] += impact * kernel
+                    spatial_total[target] += kernel
+            for target in self.anchors:
+                # Dividir al menos por 1 conserva la atenuación de los vecinos
+                # y acota cada slice incluso con varios relojes/anchors medidos.
+                evidence[target] += decay * spatial_evidence[target] / max(1.0, spatial_total[target])
+
+        if self.history_aggregation == "per_anchor":
+            # Una estimación por pareja a partir de TODAS sus observaciones en
+            # M. Los segundos sin intento no entran en el denominador; los
+            # intentos fallidos sí, con D_max. La antigüedad reduce confianza.
+            estimates = self._pair_estimates(watch_id)
+            evidence = {anchor: 0.0 for anchor in self.anchors}
+            for target in self.anchors:
+                total = 0.0
+                for source, estimate in estimates.items():
+                    kernel = self._kernel(source, target)
+                    evidence[target] += kernel * estimate["confidence"] * (1 - 2 * estimate["normalized_distance"])
+                    total += kernel
+                evidence[target] /= max(1.0, total)
+            temporal_total = 1.0
 
         now_second = int(now)
         scores: dict[str, float] = {}
@@ -156,12 +224,64 @@ class AdaptiveAnchorScheduler:
             last = self._last_selected[watch_id].get(anchor)
             waited = self.window_seconds if last is None else min(now_second - last, self.window_seconds)
             # El crédito de espera evita inanición aun cuando otro anchor tenga mucha evidencia.
-            fairness = waited / self.window_seconds
-            scores[anchor] = evidence[anchor] + 0.65 * fairness
+            fairness = max(0.0, waited / self.window_seconds)
+            signed_evidence = evidence[anchor] / temporal_total
+            # La raíz amplifica la magnitud de señales débiles, conservando
+            # el signo. No aplicar la raíz a probabilidades: las uniformaría.
+            if self.evidence_transform == "sigmoid":
+                # Sigmoide centrada y normalizada: -1 -> -1, 0 -> 0, 1 -> 1.
+                boosted = math.tanh(self.sigmoid_slope * signed_evidence) / math.tanh(self.sigmoid_slope)
+            else:
+                boosted = math.copysign(abs(signed_evidence) ** self.evidence_power, signed_evidence)
+            proximity = (1.0 + boosted) / 2.0
+            # Media ponderada: tanto la heurística como las probabilidades
+            # quedan en [0, 1], incluidos fallos y ausencia de observaciones.
+            scores[anchor] = (self.proximity_weight * proximity + self.fairness_weight * fairness) / (self.proximity_weight + self.fairness_weight)
         return scores
+
+    def _pair_estimates(self, watch_id: str) -> dict[str, dict[str, float]]:
+        """Distancia ponderada y confianza por anchor en la ventana actual."""
+        estimates = {}
+        slices = list(self.history) + [self._current_slice]
+        for anchor in self.anchors:
+            weighted_distance = total_weight = 0.0
+            newest_age = None
+            count = 0
+            for age, slice_ in enumerate(reversed(slices)):
+                timestamp = self._current_second - age
+                if (timestamp, watch_id, anchor) not in self._samples:
+                    continue
+                value = slice_.get(watch_id, {}).get(anchor, 0.0)
+                weight = self.temporal_decay ** age
+                weighted_distance += weight * self.normalized_distance(value)
+                total_weight += weight
+                newest_age = age if newest_age is None else newest_age
+                count += 1
+            if total_weight:
+                estimates[anchor] = {"normalized_distance": weighted_distance / total_weight,
+                                     "confidence": self.temporal_decay ** newest_age,
+                                     "age_seconds": newest_age, "observed_slices": count}
+        return estimates
+
+    def acceptance_weights(self, watch_id: str, candidates: Iterable[str], now: float | None = None) -> dict[str, float]:
+        """Min-max entre placas libres; la peor conserva opción de aceptación."""
+        now = time.time() if now is None else now
+        allowed = list(dict.fromkeys(canonical_anchor(a) for a in candidates if canonical_anchor(a) in self.anchors))
+        if not allowed:
+            return {}
+        scores = self._scores(watch_id, now)
+        lower = min(scores[a] for a in allowed)
+        upper = max(scores[a] for a in allowed)
+        if math.isclose(lower, upper, abs_tol=1e-12):
+            return {a: 1.0 for a in allowed}
+        return {a: min(1.0, max(self.acceptance_floor, self.acceptance_floor + (1 - self.acceptance_floor) * ((scores[a] - lower) / (upper - lower)))) for a in allowed}
 
     def probabilities(self, watch_id: str, candidates: Iterable[str], now: float | None = None) -> dict[str, float]:
         now = time.time() if now is None else now
+        if self.selection_mode == "rejection":
+            weights = self.acceptance_weights(watch_id, candidates, now)
+            total = sum(weights.values())
+            return {a: weight / total for a, weight in weights.items()}
         allowed = [canonical_anchor(anchor) for anchor in candidates if canonical_anchor(anchor) in self.anchors]
         if not allowed:
             return {}
@@ -176,6 +296,19 @@ class AdaptiveAnchorScheduler:
 
     def choose(self, watch_id: str, candidates: Iterable[str], now: float | None = None) -> tuple[str | None, dict[str, float]]:
         now = time.time() if now is None else now
+        if self.selection_mode == "rejection":
+            weights = self.acceptance_weights(watch_id, candidates, now)
+            if not weights:
+                return None, {}
+            total = sum(weights.values())
+            probabilities = {a: weight / total for a, weight in weights.items()}
+            anchors = list(weights)
+            while True:
+                anchor = self._rng.choice(anchors)
+                if self._rng.random() < weights[anchor]:
+                    break
+            self._last_selected.setdefault(watch_id, {})[anchor] = int(now)
+            return anchor, probabilities
         probabilities = self.probabilities(watch_id, candidates, now)
         if not probabilities:
             return None, {}
@@ -189,6 +322,16 @@ class AdaptiveAnchorScheduler:
         return {
             "window_seconds": self.window_seconds,
             "temporal_decay": self.temporal_decay,
+            "max_distance_m": self.max_distance_m,
+            "evidence_power": self.evidence_power,
+            "selection_mode": self.selection_mode,
+            "acceptance_floor": self.acceptance_floor,
+            "evidence_transform": self.evidence_transform,
+            "sigmoid_slope": self.sigmoid_slope,
+            "proximity_weight": self.proximity_weight,
+            "fairness_weight": self.fairness_weight,
+            "history_aggregation": self.history_aggregation,
+            "estimates_by_watch": {watch: self._pair_estimates(watch) for watch in self._current_slice},
             "timestamps": list(range(self._current_second - self.window_seconds + 1, self._current_second + 1)) if self._current_second is not None else [],
             "temporal_weights": [self.temporal_decay ** age for age in reversed(range(self.window_seconds))],
             "anchors": self.anchors,

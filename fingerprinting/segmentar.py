@@ -33,10 +33,10 @@ def timestamp_segundo(timestamp):
     return rounded.isoformat(timespec="seconds") + ".0000"
 
 
-def segmentar(uwb, data_dir, output):
-    paths = sorted(data_dir.glob("escena_*.csv"), key=lambda p: [int(s) if s.isdigit() else s for s in re.split(r"(\d+)", p.stem)])
+def segmentar(uwb, data_dir, output, patron_escenas="escena_*.csv"):
+    paths = sorted(data_dir.glob(patron_escenas), key=lambda p: [int(s) if s.isdigit() else s for s in re.split(r"(\d+)", p.stem)])
     if not paths:
-        raise ValueError("No hay ficheros escena_*.csv")
+        raise ValueError(f"No hay ficheros {patron_escenas}")
     scenes = [(p.stem, leer_escena(p)) for p in paths]
     scenes.sort(key=lambda s: s[1][0][0])
     anchors = set()
@@ -98,5 +98,6 @@ if __name__ == "__main__":
     parser.add_argument("--uwb", type=Path, default=base / "data" / "20733.watch_01 (1).tsv")
     parser.add_argument("--escenas", type=Path, default=base / "data")
     parser.add_argument("--salida", type=Path, default=base / "segmentacion.csv")
+    parser.add_argument("--patron-escenas", default="escena_*.csv")
     args = parser.parse_args()
-    segmentar(args.uwb, args.escenas, args.salida)
+    segmentar(args.uwb, args.escenas, args.salida, args.patron_escenas)

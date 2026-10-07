@@ -285,6 +285,15 @@ class UwbOrchestratorMulti:
         adaptive_temperature: float = 0.65,
         adaptive_minimum_probability: float = 0.04,
         adaptive_temporal_decay: float = 0.9,
+        adaptive_max_distance_m: float = 10.0,
+        adaptive_evidence_power: float = 0.5,
+        adaptive_selection_mode: str = "rejection",
+        adaptive_acceptance_floor: float = 0.1,
+        adaptive_evidence_transform: str = "sigmoid",
+        adaptive_sigmoid_slope: float = 4.0,
+        adaptive_proximity_weight: float = 5.0,
+        adaptive_fairness_weight: float = 1.0,
+        adaptive_history_aggregation: str = "per_anchor",
     ) -> None:
         self.broker = broker
         self.port = port
@@ -329,6 +338,15 @@ class UwbOrchestratorMulti:
             temperature=adaptive_temperature,
             minimum_probability=adaptive_minimum_probability,
             temporal_decay=adaptive_temporal_decay,
+            max_distance_m=adaptive_max_distance_m,
+            evidence_power=adaptive_evidence_power,
+            selection_mode=adaptive_selection_mode,
+            acceptance_floor=adaptive_acceptance_floor,
+            evidence_transform=adaptive_evidence_transform,
+            sigmoid_slope=adaptive_sigmoid_slope,
+            proximity_weight=adaptive_proximity_weight,
+            fairness_weight=adaptive_fairness_weight,
+            history_aggregation=adaptive_history_aggregation,
         )
 
         # --- Salud/monitorización por placa (para el dashboard) ---
@@ -1126,6 +1144,15 @@ def main() -> None:
         adaptive_temperature=float(adaptive_cfg.get("temperature", 0.65)),
         adaptive_minimum_probability=float(adaptive_cfg.get("minimum_probability", 0.04)),
         adaptive_temporal_decay=float(adaptive_cfg.get("temporal_decay", 0.9)),
+        adaptive_max_distance_m=float(adaptive_cfg.get("max_distance_m", 10.0)),
+        adaptive_evidence_power=float(adaptive_cfg.get("evidence_power", 0.5)),
+        adaptive_selection_mode=str(adaptive_cfg.get("selection_mode", "rejection")),
+        adaptive_acceptance_floor=float(adaptive_cfg.get("acceptance_floor", 0.1)),
+        adaptive_evidence_transform=str(adaptive_cfg.get("evidence_transform", "sigmoid")),
+        adaptive_sigmoid_slope=float(adaptive_cfg.get("sigmoid_slope", 4.0)),
+        adaptive_proximity_weight=float(adaptive_cfg.get("w_cercania", 5.0)),
+        adaptive_fairness_weight=float(adaptive_cfg.get("w_equidad", 1.0)),
+        adaptive_history_aggregation=str(adaptive_cfg.get("history_aggregation", "per_anchor")),
     )
 
     try:

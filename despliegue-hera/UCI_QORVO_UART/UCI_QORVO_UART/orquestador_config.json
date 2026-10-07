@@ -14,6 +14,15 @@
     "adaptive_scheduler": {
       "window_seconds": 15,
       "temporal_decay": 0.9,
+      "max_distance_m": 10.0,
+      "evidence_power": 0.25,
+      "evidence_transform": "sigmoid",
+      "sigmoid_slope": 4.0,
+      "w_cercania": 5.0,
+      "w_equidad": 1.0,
+      "history_aggregation": "per_anchor",
+      "selection_mode": "rejection",
+      "acceptance_floor": 0.1,
       "neighbor_scale": 0.30,
       "temperature": 0.65,
       "minimum_probability": 0.04
