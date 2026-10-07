@@ -17,7 +17,7 @@ class SlidingWindowTests(unittest.TestCase):
         scheduler.record("watch", "B", [20], now=114.9)
         snapshot = scheduler.snapshot()
         self.assertEqual(snapshot["timestamps"], list(range(100, 115)))
-        self.assertEqual(snapshot["history"][0]["watch"]["A"], 10)
+        self.assertEqual(snapshot["history"][0]["watch"]["A"], .01)
         scheduler.record("watch", "B", [30], now=115)
         self.assertEqual(scheduler.snapshot()["timestamps"], list(range(101, 116)))
         self.assertTrue(all(slice_["watch"]["A"] is None for slice_ in scheduler.snapshot()["history"]))
@@ -31,10 +31,10 @@ class SlidingWindowTests(unittest.TestCase):
         self.assertAlmostEqual(scores["B"] - scores["A"], (0.98 ** .5 - (0.98 * .9) ** .5) / 2)
         scheduler.record("watch", "A", [20, 30, 40], now=100.8)
         snapshot = scheduler.snapshot()
-        self.assertEqual(snapshot["history"][-2]["watch"]["A"], 25)
+        self.assertEqual(snapshot["history"][-2]["watch"]["A"], .025)
         self.assertEqual(snapshot["temporal_weights"][-3:], [0.81, 0.9, 1])
         scheduler.record("watch", "A", [], now=100.9)
-        self.assertEqual(scheduler.snapshot()["history"][-2]["watch"]["A"], 30)
+        self.assertEqual(scheduler.snapshot()["history"][-2]["watch"]["A"], .03)
 
     def test_long_gap_and_old_data(self):
         scheduler = self.scheduler()
@@ -45,7 +45,7 @@ class SlidingWindowTests(unittest.TestCase):
         self.assertEqual(len(snapshot["history"]), 15)
         self.assertEqual(snapshot["timestamps"], list(range(186, 201)))
         self.assertTrue(all(slice_["watch"]["A"] is None for slice_ in snapshot["history"]))
-        self.assertEqual(snapshot["history"][-1]["watch"]["B"], 1000)
+        self.assertEqual(snapshot["history"][-1]["watch"]["B"], 1)
 
     def test_single_second_window(self):
         scheduler = self.scheduler(window=1)
@@ -61,7 +61,7 @@ class SlidingWindowTests(unittest.TestCase):
         self.assertEqual(scheduler._pair_estimates("watch")["A"]["normalized_distance"], 0)
         self.assertNotIn("B", scheduler._pair_estimates("watch"))
         scheduler.record("watch", "B", [-1], now=101)
-        self.assertEqual(scheduler._current_slice["watch"]["B"], 1000)
+        self.assertEqual(scheduler._current_slice["watch"]["B"], 1)
         self.assertTrue(math.isnan(scheduler._current_slice["watch"]["A"]))
         self.assertEqual(scheduler._pair_estimates("watch")["A"]["observed_slices"], 1)
         json.dumps(scheduler.snapshot(), allow_nan=False)
@@ -184,9 +184,38 @@ class SlidingWindowTests(unittest.TestCase):
             scheduler.record("watch", "A", [distance], now=second)
         snapshot = scheduler.snapshot()
         self.assertEqual(snapshot["timestamps"], [101, 102, 103])
-        self.assertEqual([s["watch"]["A"] for s in snapshot["history"]], [200, 300, 400])
+        self.assertEqual([s["watch"]["A"] for s in snapshot["history"]], [.2, .3, .4])
         expected = (.81 * .2 + .9 * .3 + .4) / (.81 + .9 + 1)
         self.assertAlmostEqual(scheduler._pair_estimates("watch")["A"]["normalized_distance"], expected)
+
+    def test_hardware_and_normalized_inputs_produce_identical_matrix(self):
+        hardware, simulation = self.scheduler(), self.scheduler()
+        for step, (raw, normalized) in enumerate(((200, .2), (-1, 1), (1500, 1), (0, 0))):
+            hardware.record("w", "A", [raw], now=100 + step)
+            simulation.record("w", "A", [normalized], now=100 + step, normalized=True)
+        self.assertEqual(hardware.snapshot(), simulation.snapshot())
+        self.assertTrue(all(0 <= v <= 1 for values in hardware._samples.values() for v in values))
+        with self.assertRaises(ValueError):
+            AdaptiveAnchorScheduler(["A"], {"A": (1.1, 0)})
+
+    def test_exponential_kernel_propagates_reward_and_penalty_symmetrically(self):
+        positions = {"A": (0, 0), "B": (.25, 0), "C": (1, 0), "D": (1, 1)}
+        positive = AdaptiveAnchorScheduler(positions, positions)
+        negative = AdaptiveAnchorScheduler(positions, positions)
+        self.assertEqual(positive._kernel("A", "A"), 1)
+        self.assertAlmostEqual(positive._kernel("A", "B"), math.exp(-.25 / .30))
+        self.assertAlmostEqual(positive._kernel("A", "C"), math.exp(-1 / .30))
+        self.assertAlmostEqual(positive._kernel("A", "D"), math.exp(-math.sqrt(2) / .30))
+        positive.record("w", "A", [0], now=100)
+        negative.record("w", "A", [-1], now=100)
+        good, bad = positive._scores("w", 100), negative._scores("w", 100)
+        self.assertGreater(good["A"], good["B"])
+        self.assertGreater(good["B"], good["C"])
+        for anchor in positions:
+            self.assertAlmostEqual(good[anchor] + bad[anchor], 1)
+        self.assertGreater(good["C"], .5)
+        self.assertGreater(good["C"], good["D"])
+        self.assertTrue(math.isnan(positive._current_slice["w"]["B"]))
 
     def test_idle_seconds_do_not_dilute_distance_but_reduce_confidence(self):
         scheduler = self.scheduler()

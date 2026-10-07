@@ -1,5 +1,35 @@
 # Simulación del planificador
 
+## Actualización: distancias normalizadas e influencia exponencial recuperada
+
+El modelo actual guarda muestras y M en [0,1]: D_Max=1, fallo=1,
+desconocido=NaN/null. La entrada del hardware sigue siendo cm y se convierte
+una vez; la simulación entrega valores normalizados directamente. X,Y están
+en [0,1] con una unidad de eje equivalente a D_Max metros. La influencia
+espacial vuelve a `exp(-distancia_xy / neighbor_scale)`, con neighbor_scale=0.30,
+tanto para premio como penalización. La sigmoide final y la alternancia se conservan.
+Los campos distance y measurement de los recorridos son normalizados;
+los campos explícitos *_m conservan diagnósticos en metros.
+
+La prueba descartada de influencia lineal, con 20 semillas y 900 pasos:
+un reloj obtuvo 57.7167% de data y
+89.4105% de alternancia. Dos relojes obtienen 56.4333% y 55.9389% de data,
+con 89.9944% y 89.5940% de alternancia y cero colisiones en 36000 intentos.
+La propagación lineal era más amplia y reducía data frente a la exponencial
+anterior (63.8222% en uno y aproximadamente 62% en dos). Se registra esta
+regresión. Se recupera la exponencial manteniendo M y las entradas de simulación
+normalizadas; no se modifican pesos, recorridos ni radio de cobertura.
+
+Repetición confirmada de la exponencial normalizada: persona 1, 62.3778% data,
+87.4583% alternancia y 60.1574% data al coincidir; persona 2, 62.0056% data,
+87.3693% alternancia y 59.8908% data al coincidir. Cero colisiones en 36000
+intentos; 29 pruebas unitarias y de protocolo pasan.
+
+Los apartados siguientes conservan el historial de experimentos anteriores;
+sus métricas describen sus respectivos experimentos. Los JSON/HTML generados
+se han actualizado. En hardware debe calibrarse la relación entre los clicks
+de sit_placas y metros: el CSV no incluye dimensiones físicas del plano.
+
 ## Prueba con dos personas y placas exclusivas
 
 ```powershell

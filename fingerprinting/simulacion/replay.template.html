@@ -53,7 +53,7 @@
   });
   svg.innerHTML+=`<circle cx="${px(f.x)}" cy="${py(f.y)}" r="7" fill="var(--viz-series-2)"/>`;
   root.querySelector('#uwb-second').textContent=`${f.t}`;
-  root.querySelector('#uwb-detail').textContent=`${f.phase==='dwell'?'Estancia':f.phase==='travel'?'Traslado':'Movimiento'}${f.target===null?'':' · N'+(f.target+1)} · Placa ${f.anchor} · ${f.distance.toFixed(2)} m · ${f.available_count} placas en radio ${data.assumptions.connection_radius_m} m · ${f.ok?'data':'NO-data'}`;
+  root.querySelector('#uwb-detail').textContent=`${f.phase==='dwell'?'Estancia':f.phase==='travel'?'Traslado':'Movimiento'}${f.target===null?'':' · N'+(f.target+1)} · Placa ${f.anchor} · distancia normalizada ${f.distance.toFixed(4)} · ${f.available_count} placas en radio ${data.assumptions.connection_radius_m} m · ${f.ok?'data':'NO-data'}`;
   const stats=data.results[policy.value];
   root.querySelector('#uwb-phase-stats').textContent=stats.dwell_data_percent===null?'':`Conexión en estancias: ${stats.dwell_data_percent.toFixed(1)} % · En traslados: ${stats.travel_data_percent===null?'—':stats.travel_data_percent.toFixed(1)+' %'}`;
  }

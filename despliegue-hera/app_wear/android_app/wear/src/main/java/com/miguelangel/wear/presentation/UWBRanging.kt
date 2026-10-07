@@ -11,6 +11,8 @@ import androidx.core.uwb.UwbComplexChannel
 import androidx.core.uwb.UwbDevice
 import androidx.core.uwb.UwbManager
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
@@ -46,6 +48,8 @@ class UWBRanging(
 
             Log.d("UWBRanging", "Sesión preparada. Local UWB address: $localAdr")
             true
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Log.e("UWBRanging", "Error preparando sesión UWB", e)
             clientSession = null
@@ -59,7 +63,7 @@ class UWBRanging(
 
     fun isRangingActive(): Boolean = rangingActive
 
-    suspend fun startRanging(remoteAdr: String): Boolean {
+    suspend fun startRanging(remoteAdr: String, uwbSessionId: Int = 42): Boolean {
         val session = clientSession
         if (session == null) {
             Log.w("UWBRanging", "No hay sesión UWB preparada")
@@ -79,12 +83,12 @@ class UWBRanging(
                 complexChannel = UwbComplexChannel(9, 9),
                 peerDevices = devices,
                 updateRateType = RangingParameters.RANGING_UPDATE_RATE_FREQUENT,
-                sessionId = 42,
+                sessionId = uwbSessionId,
                 subSessionId = 0,
                 subSessionKeyInfo = null
             )
 
-            rangingJob?.cancel()
+            rangingJob?.cancelAndJoin()
 
             rangingJob = CoroutineScope(Dispatchers.Main).launch {
                 try {
@@ -100,12 +104,16 @@ class UWBRanging(
 
                             is RangingResult.RangingResultPeerDisconnected -> {
                                 Log.w("UWBRanging", "Peer desconectado")
-                                stopRanging()
+                                throw CancellationException("UWB peer disconnected")
                             }
                         }
                     }
+                } catch (e: CancellationException) {
+                    throw e
                 } catch (e: Exception) {
                     Log.e("UWBRanging", "Error en el flujo de ranging", e)
+                    rangingActive = false
+                } finally {
                     rangingActive = false
                 }
             }
@@ -113,6 +121,8 @@ class UWBRanging(
             rangingActive = true
             Log.d("UWBRanging", "Ranging iniciado con $remoteAdr")
             true
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Log.e("UWBRanging", "Error iniciando ranging con $remoteAdr", e)
             rangingActive = false
@@ -126,16 +136,17 @@ class UWBRanging(
             lastDistance = null
 
             val job = rangingJob
-            rangingJob = null
 
             if (job != null) {
-                job.cancelAndJoin()
+                withContext(NonCancellable) { job.cancelAndJoin() }
             }
 
+            rangingJob = null
             clientSession = null
             Log.d("UWBRanging", "Ranging detenido")
         } catch (e: Exception) {
             Log.e("UWBRanging", "Error deteniendo ranging", e)
+            throw e
         }
     }
 }

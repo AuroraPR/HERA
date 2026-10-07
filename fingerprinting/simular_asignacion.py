@@ -69,6 +69,8 @@ def generate_route(seed, seconds, mode):
 def simulate(seed, seconds, config, positions, policy="adaptive", scale_m=10, connection_radius_m=2.5, movement="random"):
     anchors = sorted(positions)
     settings = dict(config)
+    if not math.isclose(scale_m, config.get("max_distance_m", 10.0)):
+        raise ValueError("La escala del plano debe ser D_max: una unidad XY = D_max metros")
     settings["proximity_weight"] = settings.pop("w_cercania", 1.0)
     settings["fairness_weight"] = settings.pop("w_equidad", 1.0)
     if policy == "previous":
@@ -110,15 +112,16 @@ def simulate(seed, seconds, config, positions, policy="adaptive", scale_m=10, co
         if ok:
             connected_distances.append(distances[chosen])
         oracle_session_coverage += distances[ordered[0]] <= connection_radius_m
-        values = [max(0, distances[chosen] * 100 + radio.gauss(0, 8))] if ok else [-1]
-        scheduler.record("watch_01", chosen, values, now=1000 + second)
+        values = [min(1, max(0, (distances[chosen] + radio.gauss(0, .08)) / scale_m))] if ok else [1]
+        scheduler.record("watch_01", chosen, values, now=1000 + second, normalized=True)
         assert sum(math.isfinite(v) for v in scheduler._current_slice["watch_01"].values()) == 1
         assert len(scheduler.history) + 1 == config.get("window_seconds", 15)
         assert all(0 <= value <= 1 for value in scheduler._scores("watch_01", 1000 + second).values())
         assert abs(sum(probabilities.values()) - 1) < 1e-9
         assert 0 <= x <= 1 and 0 <= y <= 1
         frames.append({"t": second, "x": round(x, 5), "y": round(y, 5), "anchor": chosen,
-                       "ok": ok, "distance": round(distances[chosen], 3), "nearest": ordered[0],
+                       "ok": ok, "distance": round(min(1, distances[chosen] / scale_m), 4),
+                       "distance_m": round(distances[chosen], 3), "measurement": round(values[0], 4), "nearest": ordered[0],
                        "available_count": available_counts[-1],
                        "phase": phase, "target": target,
                        "rank": ordered.index(chosen) + 1})
@@ -189,6 +192,8 @@ def main():
         results[policy]["min_available_anchors"] = min(r["min_available_anchors"] for r in runs)
     output = {"assumptions": {"scale_m": args.scale_m, "session_seconds": 1,
               "measurement_per_step": 1, "unknown_cells": "NaN; excluded from weighted averages",
+              "distance_units": "normalized_by_D_max", "normalized_max_distance": 1,
+              "coordinate_units": "one axis unit = D_max metres",
               "seconds": args.seconds, "seeds": args.seeds, "max_step_per_axis": .025,
               "connection_radius_m": args.connection_radius_m,
               "layout": args.layout,

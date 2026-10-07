@@ -8,6 +8,7 @@ import android.content.Intent
 import android.os.BatteryManager
 import android.os.IBinder
 import android.os.PowerManager
+import android.os.SystemClock
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.uwb.UwbManager
@@ -15,6 +16,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -23,6 +30,7 @@ import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
 import org.eclipse.paho.client.mqttv3.MqttCallback
 import org.eclipse.paho.client.mqttv3.MqttClient
 import org.eclipse.paho.client.mqttv3.MqttMessage
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -49,6 +57,10 @@ class UwbService : Service() {
     private var heartbeatJob: Job? = null
     private var reconnectJob: Job? = null
     private var mqttReconnectAttempts: Int = 0
+    private val commands = Channel<JSONObject>(Channel.UNLIMITED)
+    @Volatile private var activeSessionId: String? = null
+    private var sessionTimeoutJob: Job? = null
+    private val closedSessions = LinkedHashSet<String>()
 
     companion object {
         private const val HEARTBEAT_INTERVAL_MS = 15_000L  // cada 15s
@@ -91,6 +103,9 @@ class UwbService : Service() {
             Log.d("UwbService", "MAC local UWB actualizada: $mac")
         }
 
+        coroutineScope.launch {
+            for (command in commands) processCommand(command)
+        }
         initMqtt()
     }
 
@@ -106,7 +121,7 @@ class UwbService : Service() {
         reconnectJob?.cancel()
         reconnectJob = null
 
-        coroutineScope.launch {
+        CoroutineScope(Dispatchers.Default).launch {
             try {
                 uwbRanging.stopRanging()
             } catch (e: Exception) {
@@ -165,9 +180,13 @@ class UwbService : Service() {
 
         try {
             mqttClient = MqttClient(uri, clientId, null)
+            mqttClient.setTimeToWait(500L)
 
             mqttClient.setCallback(object : MqttCallback {
                 override fun connectionLost(cause: Throwable?) {
+                    activeSessionId?.let { sid ->
+                        commands.trySend(JSONObject().put("action", "stop").put("session_id", sid))
+                    }
                     Log.e("MQTT", "Conexión perdida, se intentará reconectar", cause)
                     val errorMsg = cause?.message ?: "Conexión perdida"
                     saveBoolean("mqtt_connected", false)
@@ -182,7 +201,7 @@ class UwbService : Service() {
                     Log.d("MQTT_TEST", "Mensaje recibido en $topic: $payload")
                     saveLong("mqtt_last_message_at", System.currentTimeMillis())
 
-                    if (topic == commandTopic) {
+                    if (topic == commandTopic && message?.isRetained != true) {
                         handleCommand(payload)
                     } else {
                         Log.d("MQTT_TEST", "Ignorado topic no esperado: $topic")
@@ -193,8 +212,13 @@ class UwbService : Service() {
                 }
             })
 
-            mqttClient.connect()
-            mqttClient.subscribe(commandTopic)
+            mqttClient.connect(MqttConnectOptions().apply {
+                connectionTimeout = 3
+                keepAliveInterval = 10
+                setWill(presenceTopic, JSONObject().put("watch_id", watchId)
+                    .put("state", "offline").toString().toByteArray(), 1, true)
+            })
+            mqttClient.subscribe(commandTopic, 1)
 
             Log.d("MQTT", "Conectado al broker $uri")
             Log.d("MQTT", "Suscrito a $commandTopic")
@@ -235,33 +259,84 @@ class UwbService : Service() {
     }
 
     private fun handleCommand(payload: String) {
-        coroutineScope.launch {
-            try {
-                Log.d("MQTT_TEST", "handleCommand recibido: $payload")
+        try {
+            val command = JSONObject(payload)
+            command.put("received_at_ms", SystemClock.elapsedRealtime())
+            commands.trySend(command)
+        } catch (e: Exception) {
+            Log.e("MQTT_TEST", "Comando inválido", e)
+        }
+    }
 
-                val json = JSONObject(payload)
-                val action = json.optString("action", "").lowercase()
-                val anchor = json.optString("anchor", "")
-                val sessionId = json.optString("session_id", "")
+    private fun publishStopped(sessionId: String) {
+        publish(sessionTopic, JSONObject().apply {
+            put("watch_id", watchId)
+            put("session_id", sessionId)
+            put("state", "stopped")
+        }.toString())
+    }
 
-                Log.d("MQTT_TEST", "action=$action anchor=$anchor sessionId=$sessionId")
+    private suspend fun closeAttempt(sessionId: String) {
+        if (activeSessionId == sessionId) {
+            sessionTimeoutJob?.cancel()
+            sessionTimeoutJob = null
+            stopRealRanging()
+            activeSessionId = null
+        }
+        closedSessions.add(sessionId)
+        while (closedSessions.size > 64) closedSessions.remove(closedSessions.first())
+        // ACK only after cancelAndJoin has completed. A stale STOP never
+        // cancels the current session, but can ACK its own old attempt.
+        publishStopped(sessionId)
+    }
 
-                when (action) {
-                    "start" -> {
-                        Log.d("MQTT_TEST", "Entrando en START")
-                        startRealRanging(anchor, sessionId)
-                    }
-                    "stop" -> {
-                        Log.d("MQTT_TEST", "Entrando en STOP")
+    private suspend fun processCommand(command: JSONObject) {
+        val sid = command.optString("session_id", "")
+        if (sid.isBlank()) return
+        try {
+            when (command.optString("action", "").lowercase()) {
+                "reset" -> {
+                    if (sid !in closedSessions) {
+                        activeSessionId?.let { closeAttempt(it) }
                         stopRealRanging()
                     }
-                    else -> {
-                        Log.w("MQTT_TEST", "Acción desconocida: $action")
+                    closeAttempt(sid)
+                }
+                "stop" -> closeAttempt(sid)
+                "start" -> {
+                    if (sid in closedSessions) {
+                        publishStopped(sid)
+                        return
+                    }
+                    if (activeSessionId == sid) return // QoS duplicate; no deadline extension.
+                    if (activeSessionId != null) {
+                        publish(sessionTopic, JSONObject().put("state", "busy")
+                            .put("watch_id", watchId).put("session_id", sid).toString())
+                        return
+                    }
+                    val budget = command.optLong("timelimit_ms", 5000L).coerceIn(1L, 5000L)
+                    val received = command.optLong("received_at_ms", SystemClock.elapsedRealtime())
+                    val remaining = budget - (SystemClock.elapsedRealtime() - received)
+                    if (remaining <= 0) { closeAttempt(sid); return }
+                    activeSessionId = sid
+                    val deadline = SystemClock.elapsedRealtime() + remaining
+                    val ok = withTimeoutOrNull(remaining) {
+                        startRealRanging(command.optString("anchor"), sid,
+                            command.optInt("uwb_session_id", 42))
+                    } ?: false
+                    if (!ok) { closeAttempt(sid); return }
+                    sessionTimeoutJob = coroutineScope.launch {
+                        delay((deadline - SystemClock.elapsedRealtime()).coerceAtLeast(1L))
+                        commands.send(JSONObject().put("action", "stop").put("session_id", sid))
                     }
                 }
-            } catch (e: Exception) {
-                Log.e("MQTT_TEST", "Error procesando comando", e)
             }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            // No stopped ACK on failure: the coordinator retains ownership.
+            Log.e("UwbService", "Error procesando sesión $sid", e)
+            setState(ServiceState.ERROR)
         }
     }
     private fun publishPresenceOnline() {
@@ -274,7 +349,7 @@ class UwbService : Service() {
             put("battery_level", batteryLevel)
         }.toString()
 
-        publish(presenceTopic, payload)
+        publish(presenceTopic, payload, retain = true)
         Log.d("UwbService", "Presencia publicada: $payload")
     }
 
@@ -319,9 +394,9 @@ class UwbService : Service() {
         Log.d("MQTT_TEST", "Publish ejecutado en topic $sessionTopic")
     }
 
-    private suspend fun startRealRanging(anchor: String, sessionId: String) {
+    private suspend fun startRealRanging(anchor: String, sessionId: String, uwbSessionId: Int): Boolean {
         try {
-            distanceJob?.cancel()
+            distanceJob?.cancelAndJoin()
             distanceJob = null
 
             uwbRanging.stopRanging()
@@ -336,33 +411,36 @@ class UwbService : Service() {
             if (!prepared) {
                 Log.e("UwbService", "No se pudo preparar UWB para ranging")
                 setState(ServiceState.ERROR)
-                return
+                return false
             }
 
             val currentSessionMac = uwbRanging.getLocalAddress() ?: "--:--"
             localMac = currentSessionMac
             saveString("uwb_mac", currentSessionMac)
 
-            publishPreparedSession(currentSessionMac, anchor, sessionId)
-
-            val started = uwbRanging.startRanging(anchor)
+            val started = uwbRanging.startRanging(anchor, uwbSessionId)
             if (!started) {
                 Log.e("UwbService", "No se pudo iniciar ranging con $anchor")
                 setState(ServiceState.ERROR)
-                return
+                return false
             }
 
             setState(ServiceState.RANGING)
             startDistanceUpdates()
+            publishPreparedSession(currentSessionMac, anchor, sessionId)
+            return true
 
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Log.e("UwbService", "Error iniciando ranging real", e)
             setState(ServiceState.ERROR)
+            return false
         }
     }
     private suspend fun stopRealRanging() {
         try {
-            distanceJob?.cancel()
+            distanceJob?.cancelAndJoin()
             distanceJob = null
 
             uwbRanging.stopRanging()
@@ -379,6 +457,7 @@ class UwbService : Service() {
         } catch (e: Exception) {
             Log.e("UwbService", "Error deteniendo ranging real", e)
             setState(ServiceState.ERROR)
+            throw e
         }
     }
 
@@ -394,6 +473,8 @@ class UwbService : Service() {
                         Log.d("UwbService", "Distancia actualizada: $distance m")
                     }
                     delay(1000)
+                } catch (e: CancellationException) {
+                    throw e
                 } catch (e: Exception) {
                     Log.e("UwbService", "Error actualizando distancia", e)
                 }
@@ -401,10 +482,13 @@ class UwbService : Service() {
         }
     }
 
-    private fun publish(topic: String, payload: String) {
+    private fun publish(topic: String, payload: String, retain: Boolean = false) {
         try {
             if (::mqttClient.isInitialized && mqttClient.isConnected) {
-                mqttClient.publish(topic, MqttMessage(payload.toByteArray()))
+                mqttClient.publish(topic, MqttMessage(payload.toByteArray()).apply {
+                    qos = 1
+                    isRetained = retain
+                })
             }
         } catch (e: Exception) {
             Log.e("MQTT", "Error publicando en $topic", e)

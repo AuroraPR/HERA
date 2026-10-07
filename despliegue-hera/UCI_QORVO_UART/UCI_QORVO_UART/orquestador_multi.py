@@ -281,11 +281,11 @@ class UwbOrchestratorMulti:
         round_robin_mode: str = "adaptive",
         anchor_positions_file: str | None = None,
         adaptive_window_seconds: int = 15,
-        adaptive_neighbor_scale: float = 0.30,
         adaptive_temperature: float = 0.65,
         adaptive_minimum_probability: float = 0.04,
         adaptive_temporal_decay: float = 0.9,
         adaptive_max_distance_m: float = 10.0,
+        adaptive_neighbor_scale: float = 0.30,
         adaptive_evidence_power: float = 0.5,
         adaptive_selection_mode: str = "rejection",
         adaptive_acceptance_floor: float = 0.1,
@@ -334,11 +334,11 @@ class UwbOrchestratorMulti:
             self.anchor_order,
             positions,
             window_seconds=adaptive_window_seconds,
-            neighbor_scale=adaptive_neighbor_scale,
             temperature=adaptive_temperature,
             minimum_probability=adaptive_minimum_probability,
             temporal_decay=adaptive_temporal_decay,
             max_distance_m=adaptive_max_distance_m,
+            neighbor_scale=adaptive_neighbor_scale,
             evidence_power=adaptive_evidence_power,
             selection_mode=adaptive_selection_mode,
             acceptance_floor=adaptive_acceptance_floor,
@@ -1098,6 +1098,10 @@ def main() -> None:
     args = parser.parse_args()
 
     config = load_config(args.config)
+    if config.get("orchestrator", {}).get("transport", "mqtt") == "mqtt":
+        from mqtt_orchestrator import run
+        run(config, args.config)
+        return
 
     mqtt_cfg = config.get("mqtt", {})
     broker = mqtt_cfg.get("broker", "192.168.18.22")
@@ -1140,11 +1144,11 @@ def main() -> None:
         round_robin_mode=round_robin_mode,
         anchor_positions_file=anchor_positions_file,
         adaptive_window_seconds=int(adaptive_cfg.get("window_seconds", 15)),
-        adaptive_neighbor_scale=float(adaptive_cfg.get("neighbor_scale", 0.30)),
         adaptive_temperature=float(adaptive_cfg.get("temperature", 0.65)),
         adaptive_minimum_probability=float(adaptive_cfg.get("minimum_probability", 0.04)),
         adaptive_temporal_decay=float(adaptive_cfg.get("temporal_decay", 0.9)),
         adaptive_max_distance_m=float(adaptive_cfg.get("max_distance_m", 10.0)),
+        adaptive_neighbor_scale=float(adaptive_cfg.get("neighbor_scale", 0.30)),
         adaptive_evidence_power=float(adaptive_cfg.get("evidence_power", 0.5)),
         adaptive_selection_mode=str(adaptive_cfg.get("selection_mode", "rejection")),
         adaptive_acceptance_floor=float(adaptive_cfg.get("acceptance_floor", 0.1)),

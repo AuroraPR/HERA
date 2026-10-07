@@ -4,8 +4,8 @@
     "port": 1883
   },
   "orchestrator": {
-    "ranging_time": 10,
-    "prepare_timeout": 15,
+    "transport": "mqtt",
+    "timelimit": 5,
     "data_dir": "data",
     "run_script": "run_fira_twr_backup.py",
     "python_cmd": "python",

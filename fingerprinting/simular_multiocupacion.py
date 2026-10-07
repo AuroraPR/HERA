@@ -65,13 +65,14 @@ def simulate(seed, config, positions, steps=900, policy="adaptive"):
         for i, watch in enumerate(watches):
             person = people[i]
             anchor, probabilities = assignments[watch]
-            distance = 10 * math.dist((person["x"], person["y"]), positions[anchor])
-            ok = distance <= 4.11
+            distance = min(1, math.dist((person["x"], person["y"]), positions[anchor]))
+            ok = distance <= 4.11 / config["max_distance_m"]
             noise = random.Random(seed * 1000000 + step * 100 + i * 10 + anchors.index(anchor))
-            scheduler.record(watch, anchor, [max(0, distance * 100 + noise.gauss(0, 8))] if ok else [-1], now=1000 + step)
+            measurement = min(1, max(0, distance + noise.gauss(0, .08 / config["max_distance_m"]))) if ok else 1
+            scheduler.record(watch, anchor, [measurement], now=1000 + step, normalized=True)
             assert sum(math.isfinite(v) for v in scheduler._current_slice[watch].values()) == 1
             assert math.isclose(sum(probabilities.values()), 1)
-            person.update(anchor=anchor, ok=ok, distance=round(distance, 4))
+            person.update(anchor=anchor, ok=ok, distance=round(distance, 4), measurement=round(measurement, 4))
             person["x"], person["y"] = round(person["x"], 5), round(person["y"], 5)
         assert len(scheduler.history) + 1 == 15
         frames.append({"t": step, "shared": coincident, "people": people})
@@ -96,7 +97,7 @@ def simulate(seed, config, positions, steps=900, policy="adaptive"):
 
 def main():
     config = json.loads((BASE.parent / "despliegue-hera/UCI_QORVO_UART/UCI_QORVO_UART/orquestador_config.json").read_text(encoding="utf-8"))["orchestrator"]["adaptive_scheduler"]
-    positions = double_coverage_positions(load_anchor_positions(BASE / "data/sit_placas.csv"), 1.5, 10)
+    positions = double_coverage_positions(load_anchor_positions(BASE / "data/sit_placas.csv"), 1.5, config["max_distance_m"])
     results, examples = {}, {}
     for policy in ("adaptive", "uniform"):
         runs = []
@@ -110,6 +111,8 @@ def main():
             results[policy][watch] = {k: mean(r[watch][k] for r in runs) for k in runs[0][watch]}
     output = {"config": config, "positions": positions, "results": results, "examples": examples,
               "assumptions": {"seeds": 20, "steps": 900, "watches": 2, "radius_m": 4.11,
+                              "distance_units": "normalized_by_D_max", "normalized_max_distance": 1,
+                              "coordinate_units": "one axis unit = D_max metres",
                               "pair_spacing_m": 1.5, "window": 15, "measurements_per_watch_step": 1,
                               "allocation": "Exclusive batch; alternate first watch; release after each step"}}
     folder = BASE / "simulacion"

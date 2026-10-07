@@ -195,6 +195,10 @@ class MQTTClient:
     def wait_msg(self):
         res = self.sock.read(1)
         self.sock.setblocking(True)
+        # Optional bounded I/O for the anchor control loop: a partial MQTT
+        # packet must not prevent the local UWB deadline from being checked.
+        if getattr(self, "io_timeout", None) is not None:
+            self.sock.settimeout(self.io_timeout)
         if res is None:
             return None
         if res == b"":

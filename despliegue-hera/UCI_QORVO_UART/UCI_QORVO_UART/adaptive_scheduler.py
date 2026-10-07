@@ -1,7 +1,7 @@
 """Política de selección UWB basada en vecindad, historial y equidad.
 
 La matriz M se guarda como ``history[segundo][reloj][anchor]``. Cada celda es
-la mediana de distancia de ese segundo, D_max si el intento falló y NaN si
+la mediana de distancia normalizada en [0, 1], 1 si el intento falló y NaN si
 no hubo un intento para esa pareja en ese segundo. Las celdas desconocidas
 no entran en las medias. En el snapshot JSON se exportan como null.
 """
@@ -95,8 +95,13 @@ class AdaptiveAnchorScheduler:
         self.history_aggregation = history_aggregation
         self.anchors = [canonical_anchor(anchor) for anchor in anchors]
         self.positions = {canonical_anchor(key): value for key, value in positions.items()}
+        if any(len(p) != 2 or any(not math.isfinite(v) or not 0 <= v <= 1 for v in p)
+               for p in self.positions.values()):
+            raise ValueError("Las posiciones x,y deben estar normalizadas entre 0 y 1")
         self.window_seconds = window_seconds
-        self.neighbor_scale = max(neighbor_scale, 0.001)
+        if not math.isfinite(neighbor_scale) or neighbor_scale <= 0:
+            raise ValueError("neighbor_scale debe ser finito y mayor que 0")
+        self.neighbor_scale = neighbor_scale
         self.temperature = max(temperature, 0.05)
         self.minimum_probability = minimum_probability
         # La slice en curso también forma parte de M, por eso el histórico
@@ -140,15 +145,17 @@ class AdaptiveAnchorScheduler:
         cutoff = self._current_second - self.window_seconds + 1
         self._samples = {key: values for key, values in self._samples.items() if key[0] >= cutoff}
 
-    def record(self, watch_id: str, anchor: str, values: Iterable[float], now: float | None = None) -> float:
-        """Mediana del segundo; un intento sin distancia aporta D_max."""
+    def record(self, watch_id: str, anchor: str, values: Iterable[float], now: float | None = None,
+               normalized: bool = False) -> float:
+        """Entrada HW en cm o simulación normalizada; devuelve mediana en [0,1]."""
         now = time.time() if now is None else now
         self._advance(now)
         self._ensure_watch(watch_id)
         anchor = canonical_anchor(anchor)
         samples = [float(value) for value in values if float(value) >= 0 and math.isfinite(float(value))]
+        samples = [min(value, 1.0) if normalized else self.normalized_distance(value) for value in samples]
         if not samples:
-            samples = [100 * self.max_distance_m]
+            samples = [1.0]
         distance = median(samples)
         second = int(now)
         age = self._current_second - second
@@ -169,6 +176,8 @@ class AdaptiveAnchorScheduler:
         first, second = self.positions.get(source), self.positions.get(target)
         if first is None or second is None:
             return 0.0
+        # Coordinates and scale use D_max as their unit. Do not clip the
+        # diagonal before applying the kernel: that would create a plateau.
         distance = math.dist(first, second)
         return math.exp(-distance / self.neighbor_scale)
 
@@ -193,7 +202,7 @@ class AdaptiveAnchorScheduler:
                 # Desconocida no es fallo; una distancia cero sí es válida.
                 if not math.isfinite(value):
                     continue
-                impact = 1.0 - self.normalized_distance(value) if value >= 0 else -1.0
+                impact = 1.0 - 2.0 * value
                 for target in self.anchors:
                     kernel = self._kernel(source, target)
                     spatial_evidence[target] += impact * kernel
@@ -259,7 +268,7 @@ class AdaptiveAnchorScheduler:
                 if not math.isfinite(value):
                     continue
                 weight = self.temporal_decay ** age
-                weighted_distance += weight * self.normalized_distance(value)
+                weighted_distance += weight * value
                 total_weight += weight
                 newest_age = age if newest_age is None else newest_age
                 count += 1
@@ -362,6 +371,11 @@ class AdaptiveAnchorScheduler:
             "window_seconds": self.window_seconds,
             "temporal_decay": self.temporal_decay,
             "max_distance_m": self.max_distance_m,
+            "distance_units": "normalized_by_D_max",
+            "normalized_max_distance": 1.0,
+            "spatial_kernel": "exp(-euclidean_distance_xy / neighbor_scale)",
+            "neighbor_scale": self.neighbor_scale,
+            "coordinate_units": "one axis unit = max_distance_m metres",
             "evidence_power": self.evidence_power,
             "selection_mode": self.selection_mode,
             "acceptance_floor": self.acceptance_floor,

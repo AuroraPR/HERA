@@ -1,9 +1,7 @@
 # main.py -- Pico 2W
 #
-# - Bridge TCP<->UART en el puerto 9000: EXACTAMENTE IGUAL QUE SIEMPRE,
-#   sin tocar, para no arriesgar el rendimiento del protocolo UCI.
-# - Canal de CONTROL (reinicio del DWM, estado de la Pico) ahora por MQTT,
-#   en un hilo aparte, usando umqtt.simple.
+# - MQTT commands/results only. UCI runs locally through anchor_uci.py.
+# - No TCP listener. First valid distance triggers local stop/deinit.
 #
 # IMPORTANTE: necesitas subir tambien la libreria umqtt a la Pico.
 # La forma mas facil (con la Pico ya conectada a WiFi, desde el REPL o
@@ -14,13 +12,12 @@
 #
 # Esto la instala en /lib, donde este script ya la puede importar.
 
-import network, socket, machine, time, gc, ujson
+import network, machine, time, gc, ujson
 from umqtt.simple import MQTTClient
+from anchor_uci import AnchorWorker
 
 SSID = "Adetem"
 PASSWORD = "JaviAurora"
-
-UART_TCP_PORT = 9000
 
 UART_ID = 0
 UART_TX_PIN = 0   # GP0 -> RXD_RPI (pin 10 de J10 del DWM)
@@ -45,6 +42,9 @@ MQTT_CLIENT_ID = "pico_" + ANCHOR_ID.replace(":", "")
 
 STATUS_TOPIC = f"uwb/pico/{ANCHOR_ID}/status".encode()
 COMMANDS_TOPIC = f"uwb/pico/{ANCHOR_ID}/commands".encode()
+EVENTS_TOPIC = f"uwb/pico/{ANCHOR_ID}/events".encode()
+worker = None
+outbox = {}
 
 STATUS_PUBLISH_INTERVAL_S = 10
 
@@ -90,38 +90,13 @@ def connect_wifi():
     return ip, wlan
 
 
-def uart_bridge_server(ip):
-    """Puente transparente TCP<->UART -- SIN CAMBIOS respecto a como
-    funcionaba antes. No tocar."""
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    s.bind((ip, UART_TCP_PORT))
-    s.listen(1)
-    print(f"[UART] Escuchando en {ip}:{UART_TCP_PORT}")
-
-    while True:
-        conn, addr = s.accept()
-        print("[UART] Cliente conectado:", addr)
-        conn.setblocking(False)
-        try:
-            while True:
-                try:
-                    data = conn.recv(256)
-                    if data:
-                        uart.write(data)
-                    elif data == b"":
-                        break
-                except OSError:
-                    pass
-
-                if uart.any():
-                    conn.send(uart.read())
-
-                time.sleep_ms(1)
-        except OSError as e:
-            print("[UART] Conexion perdida:", e)
-        finally:
-            conn.close()
+def hard_reset_dwm():
+    power_pin.value(0)
+    time.sleep_ms(20)
+    if uart.any():
+        uart.read()
+    power_pin.value(1)
+    time.sleep_ms(150)
 
 
 # Tabla de referencia voltaje->porcentaje para una celda Li-ion 18650
@@ -214,6 +189,7 @@ def build_status_payload(wlan) -> bytes:
 
     payload = {
         "anchor": ANCHOR_ID,
+        "protocol": "mqtt_uci_v1",
         "state": "online",
         "ip": ip,
         "uptime_s": uptime_s,
@@ -237,6 +213,21 @@ def on_mqtt_message(topic, msg):
 
     action = str(payload.get("action", "")).upper()
 
+    if action == "ACK":
+        outbox.pop((payload.get("session_id"), payload.get("event")), None)
+        return
+    if action in ("START", "STOP", "RESET"):
+        payload["action"] = action.lower()
+        try:
+            worker.command(payload)
+        except (ValueError, KeyError) as exc:
+            print("[UCI] Comando invalido:", exc)
+        return
+
+    if worker.active:
+        worker.close("power_command")
+        worker.finish(reset=True)
+
     if action == "POWER_OFF":
         power_pin.value(0)
     elif action == "POWER_ON":
@@ -253,6 +244,13 @@ def mqtt_control_loop(wlan):
     """Hilo de control: conecta a MQTT, se suscribe a comandos, publica
     estado periodicamente, y registra un Last Will para que el broker
     marque esta Pico como offline si se cae de forma anomala."""
+    global worker
+    def emit(payload):
+        outbox[(payload["session_id"], payload["event"])] = ujson.dumps(payload).encode()
+        if len(outbox) > 64:
+            raise RuntimeError("MQTT outbox full")
+    worker = AnchorWorker(ANCHOR_ID, uart.write, emit, time.ticks_ms, hard_reset_dwm, time.ticks_diff)
+    hard_reset_dwm()
     while True:
         try:
             client = MQTTClient(
@@ -272,23 +270,36 @@ def mqtt_control_loop(wlan):
             client.set_callback(on_mqtt_message)
             client.connect()
             client.subscribe(COMMANDS_TOPIC)
+            client.io_timeout = 0.1
             print(f"[MQTT] Conectado a {MQTT_BROKER}:{MQTT_PORT}, suscrito a {COMMANDS_TOPIC}")
 
             # Publicamos estado "online" inmediatamente al conectar
             client.publish(STATUS_TOPIC, build_status_payload(wlan), retain=True)
 
             last_status_publish = time.time()
+            last_events = time.ticks_ms() - 250
 
             while True:
+                worker.poll()
                 client.check_msg()  # no bloqueante, procesa comandos entrantes
+                if uart.any():
+                    worker.feed(uart.read())
+                worker.poll()
+                if time.ticks_diff(time.ticks_ms(), last_events) >= 20:
+                    for payload in list(outbox.values()):
+                        client.publish(EVENTS_TOPIC, payload, retain=False, qos=0)
+                    last_events = time.ticks_ms()
 
                 if time.time() - last_status_publish >= STATUS_PUBLISH_INTERVAL_S:
                     client.publish(STATUS_TOPIC, build_status_payload(wlan), retain=True)
                     last_status_publish = time.time()
 
-                time.sleep_ms(200)
+                time.sleep_ms(2)
 
         except Exception as e:
+            if worker.active:
+                worker.close("mqtt_disconnected")
+                worker.finish(reset=True)
             print("[MQTT] Error, reconectando en 3s:", e)
             time.sleep(3)
 
@@ -296,10 +307,7 @@ def mqtt_control_loop(wlan):
 def main():
     ip, wlan = connect_wifi()
 
-    import _thread
-    _thread.start_new_thread(mqtt_control_loop, (wlan,))
-
-    uart_bridge_server(ip)
+    mqtt_control_loop(wlan)
 
 
 while True:
