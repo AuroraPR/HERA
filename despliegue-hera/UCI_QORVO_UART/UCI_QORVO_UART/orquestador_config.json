@@ -42,9 +42,7 @@
   "cycle": {
     "enabled": true,
     "watches": [
-      "watch_01",
-      "watch_02",
-      "watch_03"
+      "watch_01"
     ],
     "loop_interval_seconds": 1.0,
     "launch_stagger_seconds": 0.3
