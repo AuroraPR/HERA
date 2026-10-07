@@ -129,7 +129,7 @@ python test_adaptive_scheduler.py
 python test_mqtt_pipeline.py
 ```
 
-17 pruebas del algoritmo y 14 del protocolo: primera medida, UART dividido,
+18 pruebas del algoritmo y 14 del protocolo: primera medida, UART dividido,
 peer/handle incorrectos, timeout y reset, duplicados, STOP atrasado, recuperación,
 espera de ambos cierres, W independiente por reloj y equivalencia de puntuaciones
 con el modelo validado. La prueba completa usa dos relojes y DWM emulado en 200

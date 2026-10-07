@@ -90,8 +90,8 @@ class AdaptiveAnchorScheduler:
             raise ValueError("Los pesos deben ser finitos, no negativos y sumar más que 0")
         self.proximity_weight = proximity_weight
         self.fairness_weight = fairness_weight
-        if history_aggregation not in {"per_anchor", "legacy"}:
-            raise ValueError("history_aggregation debe ser 'per_anchor' o 'legacy'")
+        if history_aggregation not in {"per_anchor", "per_slice", "legacy"}:
+            raise ValueError("history_aggregation debe ser 'per_anchor', 'per_slice' o 'legacy'")
         self.history_aggregation = history_aggregation
         self.anchors = [canonical_anchor(anchor) for anchor in anchors]
         self.positions = {canonical_anchor(key): value for key, value in positions.items()}

@@ -217,6 +217,26 @@ class SlidingWindowTests(unittest.TestCase):
         self.assertGreater(good["C"], good["D"])
         self.assertTrue(math.isnan(positive._current_slice["w"]["B"]))
 
+    def test_per_slice_failure_spreads_only_in_its_time_slice(self):
+        positions = {"A": (0, 0), "B": (.25, 0)}
+        scheduler = AdaptiveAnchorScheduler(positions, positions, window_seconds=3,
+            history_aggregation="per_slice", evidence_transform="power", evidence_power=1,
+            fairness_weight=0)
+        scheduler.record("w", "A", [0], now=100)
+        before = scheduler.snapshot()["history"][-1]
+        scheduler.record("w", "A", [-1], now=101)
+        state = scheduler.snapshot()
+        self.assertEqual(state["history"][-2], before)
+        self.assertEqual(state["history"][-1]["w"]["A"], 1)
+        self.assertIsNone(state["history"][-1]["w"]["B"])
+        scores = scheduler._scores("w", 101)
+        total = 1 + .9 + .81
+        self.assertAlmostEqual(scores["A"], (1 + (.9 - 1) / total) / 2)
+        self.assertAlmostEqual(scores["B"], (1 + (.9 - 1) * math.exp(-.25/.3) / total) / 2)
+        scheduler.record("w", "B", [0], now=102)
+        self.assertEqual(scheduler.snapshot()["history"][-2], state["history"][-1])
+        self.assertIsNone(scheduler.snapshot()["history"][-1]["w"]["A"])
+
     def test_idle_seconds_do_not_dilute_distance_but_reduce_confidence(self):
         scheduler = self.scheduler()
         scheduler.record("watch", "A", [100], now=100)

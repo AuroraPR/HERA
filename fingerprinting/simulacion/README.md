@@ -1,5 +1,21 @@
 # Simulación del planificador
 
+## Experimento posterior: propagar dentro de cada slice
+
+Disponible mediante history_aggregation=per_slice. Cada lectura normalizada d
+aporta 1-2*d únicamente en la slice de su intento; fallo d=1 aporta -1,
+desconocido NaN no aporta evidencia. Se propaga por exp(-distancia_xy/.30)
+dentro de esa slice y después se suman las slices con pesos 0.9^edad,
+dividiendo por la suma de pesos de W. No se escribe en otras celdas de M.
+
+20 semillas x 900 pasos x 2 personas: data 54.0667% / 53.0778%, alternancia
+91.2959% / 91.4071%, data al coincidir 51.0979% / 50.5485%, cero colisiones.
+Los archivos resultados_multi.json y multi.html muestran este experimento.
+La configuración de hardware conserva per_anchor (62.3778% / 62.0056% data),
+pues esta prueba empeora los resultados. replay.html conserva el experimento
+individual con per_anchor. Pasan 32 pruebas, incluida la ausencia de cambios
+en slices anteriores/futuras y la simetría del premio y penalización.
+
 ## Actualización: distancias normalizadas e influencia exponencial recuperada
 
 El modelo actual guarda muestras y M en [0,1]: D_Max=1, fallo=1,
