@@ -1,0 +1,822 @@
+[VERBOSE] cliente MQTT creado; conectando a 192.168.2.168:1883
+[VERBOSE] on_connect rc=0 broker=192.168.2.168:1883
+[VERBOSE] suscripción topic='uwb/presence/+' result=0 mid=1
+[VERBOSE] suscripción topic='uwb/session/+' result=0 mid=2
+[VERBOSE] suscripción topic='uwb/pico/+/status' result=0 mid=3
+[VERBOSE] suscripción topic='uwb/pico/+/events' result=0 mid=4
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] mensaje recibido topic='uwb/presence/watch_01' retain=True payload=b'{"watch_id":"watch_01","state":"online","battery_level":85}'
+[VERBOSE] procesando topic='uwb/presence/watch_01' retained=True body={'watch_id': 'watch_01', 'state': 'online', 'battery_level': 85}
+[VERBOSE] reloj watch_01: online y configurado; solicito reset/presentación
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/status' retain=True payload=b'{"free_mem": 410864, "anchor": "00:07", "state": "online", "uptime_s": 2485, "battery_charging": false, "ip": "192.168.2.236", "rssi": -54, "protocol": "mqtt_uci_v1", "battery_voltage": 3.89, "power": "ON", "battery_percent": 68}'
+[VERBOSE] procesando topic='uwb/pico/00:07/status' retained=True body={'free_mem': 410864, 'anchor': '00:07', 'state': 'online', 'uptime_s': 2485, 'battery_charging': False, 'ip': '192.168.2.236', 'rssi': -54, 'protocol': 'mqtt_uci_v1', 'battery_voltage': 3.89, 'power': 'ON', 'battery_percent': 68}
+[VERBOSE] placa 00:07: online, power ON y protocolo válido; solicito ready
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_d668d420e6384a36b2718638e83e52c5", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_d668d420e6384a36b2718638e83e52c5', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_d668d420e6384a36b2718638e83e52c5", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_d668d420e6384a36b2718638e83e52c5', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"event": "ready", "session_id": "boot_4e4a09554a5b43259d59d9d9fcabb222_24595dc2", "anchor": "00:07"}'
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"event": "ready", "session_id": "boot_4e4a09554a5b43259d59d9d9fcabb222_24595dc2", "anchor": "00:07"}'
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'event': 'ready', 'session_id': 'boot_4e4a09554a5b43259d59d9d9fcabb222_24595dc2', 'anchor': '00:07'}
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'event': 'ready', 'session_id': 'boot_4e4a09554a5b43259d59d9d9fcabb222_24595dc2', 'anchor': '00:07'}
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"event": "ready", "session_id": "boot_4e4a09554a5b43259d59d9d9fcabb222_24595dc2", "anchor": "00:07"}'
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'event': 'ready', 'session_id': 'boot_4e4a09554a5b43259d59d9d9fcabb222_24595dc2', 'anchor': '00:07'}
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"event": "ready", "session_id": "boot_4e4a09554a5b43259d59d9d9fcabb222_24595dc2", "anchor": "00:07"}'
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'event': 'ready', 'session_id': 'boot_4e4a09554a5b43259d59d9d9fcabb222_24595dc2', 'anchor': '00:07'}
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"event": "ready", "session_id": "boot_4e4a09554a5b43259d59d9d9fcabb222_24595dc2", "anchor": "00:07"}'
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'event': 'ready', 'session_id': 'boot_4e4a09554a5b43259d59d9d9fcabb222_24595dc2', 'anchor': '00:07'}
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] no emparejo reloj=watch_01: activo=False ready_watch=False ready_watches=set()
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"boot_4e4a09554a5b43259d59d9d9fcabb222_392ceaaa","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'boot_4e4a09554a5b43259d59d9d9fcabb222_392ceaaa', 'state': 'stopped'}
+[VERBOSE] buscando placa para reloj=watch_01: ready_anchors={'00:07'} libres=['00:07']
+[VERBOSE] EMPAREJAMIENTO creado watch=watch_01 anchor=00:07 session=sess_67227bb2f5ea43289fd4009eac77f8db
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_67227bb2f5ea43289fd4009eac77f8db","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_67227bb2f5ea43289fd4009eac77f8db', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_67227bb2f5ea43289fd4009eac77f8db","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_67227bb2f5ea43289fd4009eac77f8db', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_67227bb2f5ea43289fd4009eac77f8db", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_67227bb2f5ea43289fd4009eac77f8db', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] buscando placa para reloj=watch_01: ready_anchors={'00:07'} libres=['00:07']
+[VERBOSE] EMPAREJAMIENTO creado watch=watch_01 anchor=00:07 session=sess_32f7764f7d6241ecab662887925b5005
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_67227bb2f5ea43289fd4009eac77f8db", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_67227bb2f5ea43289fd4009eac77f8db', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_67227bb2f5ea43289fd4009eac77f8db", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_67227bb2f5ea43289fd4009eac77f8db', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_67227bb2f5ea43289fd4009eac77f8db","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_67227bb2f5ea43289fd4009eac77f8db', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_32f7764f7d6241ecab662887925b5005","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_32f7764f7d6241ecab662887925b5005', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_32f7764f7d6241ecab662887925b5005","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_32f7764f7d6241ecab662887925b5005', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_32f7764f7d6241ecab662887925b5005", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_32f7764f7d6241ecab662887925b5005', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] buscando placa para reloj=watch_01: ready_anchors={'00:07'} libres=['00:07']
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_32f7764f7d6241ecab662887925b5005", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] EMPAREJAMIENTO creado watch=watch_01 anchor=00:07 session=sess_fde11a813d5443069006e8c3968c6f00
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_32f7764f7d6241ecab662887925b5005', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_32f7764f7d6241ecab662887925b5005", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_32f7764f7d6241ecab662887925b5005', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_32f7764f7d6241ecab662887925b5005","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_32f7764f7d6241ecab662887925b5005', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_32f7764f7d6241ecab662887925b5005","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_32f7764f7d6241ecab662887925b5005', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_fde11a813d5443069006e8c3968c6f00","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_fde11a813d5443069006e8c3968c6f00', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_fde11a813d5443069006e8c3968c6f00","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_fde11a813d5443069006e8c3968c6f00', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_fde11a813d5443069006e8c3968c6f00", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_fde11a813d5443069006e8c3968c6f00', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] buscando placa para reloj=watch_01: ready_anchors={'00:07'} libres=['00:07']
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_fde11a813d5443069006e8c3968c6f00", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] EMPAREJAMIENTO creado watch=watch_01 anchor=00:07 session=sess_196e9569c3424bc8ab1369faa1e61bcd
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_fde11a813d5443069006e8c3968c6f00", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_fde11a813d5443069006e8c3968c6f00', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_fde11a813d5443069006e8c3968c6f00", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_fde11a813d5443069006e8c3968c6f00', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_fde11a813d5443069006e8c3968c6f00', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_fde11a813d5443069006e8c3968c6f00", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_fde11a813d5443069006e8c3968c6f00', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_fde11a813d5443069006e8c3968c6f00", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_fde11a813d5443069006e8c3968c6f00', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_fde11a813d5443069006e8c3968c6f00","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_fde11a813d5443069006e8c3968c6f00', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_fde11a813d5443069006e8c3968c6f00","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_fde11a813d5443069006e8c3968c6f00', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_196e9569c3424bc8ab1369faa1e61bcd","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_196e9569c3424bc8ab1369faa1e61bcd', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_196e9569c3424bc8ab1369faa1e61bcd","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_196e9569c3424bc8ab1369faa1e61bcd', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_196e9569c3424bc8ab1369faa1e61bcd", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_196e9569c3424bc8ab1369faa1e61bcd', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] buscando placa para reloj=watch_01: ready_anchors={'00:07'} libres=['00:07']
+[VERBOSE] EMPAREJAMIENTO creado watch=watch_01 anchor=00:07 session=sess_9f79cb100f2c498eace8b14c4f39c533
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_196e9569c3424bc8ab1369faa1e61bcd", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_196e9569c3424bc8ab1369faa1e61bcd', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_196e9569c3424bc8ab1369faa1e61bcd", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_196e9569c3424bc8ab1369faa1e61bcd', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_196e9569c3424bc8ab1369faa1e61bcd", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_196e9569c3424bc8ab1369faa1e61bcd', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_196e9569c3424bc8ab1369faa1e61bcd", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_196e9569c3424bc8ab1369faa1e61bcd', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_196e9569c3424bc8ab1369faa1e61bcd","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_196e9569c3424bc8ab1369faa1e61bcd', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_196e9569c3424bc8ab1369faa1e61bcd","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_196e9569c3424bc8ab1369faa1e61bcd', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_9f79cb100f2c498eace8b14c4f39c533","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_9f79cb100f2c498eace8b14c4f39c533', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_9f79cb100f2c498eace8b14c4f39c533","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_9f79cb100f2c498eace8b14c4f39c533', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_9f79cb100f2c498eace8b14c4f39c533", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_9f79cb100f2c498eace8b14c4f39c533', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_9f79cb100f2c498eace8b14c4f39c533", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] buscando placa para reloj=watch_01: ready_anchors={'00:07'} libres=['00:07']
+[VERBOSE] EMPAREJAMIENTO creado watch=watch_01 anchor=00:07 session=sess_3d15b00f43594e8aa137eea40a203c73
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_9f79cb100f2c498eace8b14c4f39c533', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_9f79cb100f2c498eace8b14c4f39c533", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_9f79cb100f2c498eace8b14c4f39c533", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_9f79cb100f2c498eace8b14c4f39c533', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_9f79cb100f2c498eace8b14c4f39c533","state":"stopped"}'
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_9f79cb100f2c498eace8b14c4f39c533', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_9f79cb100f2c498eace8b14c4f39c533', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_9f79cb100f2c498eace8b14c4f39c533","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_9f79cb100f2c498eace8b14c4f39c533', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_3d15b00f43594e8aa137eea40a203c73","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_3d15b00f43594e8aa137eea40a203c73', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_3d15b00f43594e8aa137eea40a203c73","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_3d15b00f43594e8aa137eea40a203c73', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_3d15b00f43594e8aa137eea40a203c73","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_3d15b00f43594e8aa137eea40a203c73', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_3d15b00f43594e8aa137eea40a203c73", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_3d15b00f43594e8aa137eea40a203c73', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] buscando placa para reloj=watch_01: ready_anchors={'00:07'} libres=['00:07']
+[VERBOSE] EMPAREJAMIENTO creado watch=watch_01 anchor=00:07 session=sess_18ba6612081e4c8d84e8a9617206130d
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_3d15b00f43594e8aa137eea40a203c73", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_3d15b00f43594e8aa137eea40a203c73', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_3d15b00f43594e8aa137eea40a203c73", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_3d15b00f43594e8aa137eea40a203c73', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_3d15b00f43594e8aa137eea40a203c73", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_3d15b00f43594e8aa137eea40a203c73', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_3d15b00f43594e8aa137eea40a203c73", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_3d15b00f43594e8aa137eea40a203c73', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_3d15b00f43594e8aa137eea40a203c73","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_3d15b00f43594e8aa137eea40a203c73', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_18ba6612081e4c8d84e8a9617206130d","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_18ba6612081e4c8d84e8a9617206130d', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_18ba6612081e4c8d84e8a9617206130d","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_18ba6612081e4c8d84e8a9617206130d', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_18ba6612081e4c8d84e8a9617206130d", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_18ba6612081e4c8d84e8a9617206130d', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] buscando placa para reloj=watch_01: ready_anchors={'00:07'} libres=['00:07']
+[VERBOSE] EMPAREJAMIENTO creado watch=watch_01 anchor=00:07 session=sess_7a497ec3604d42998fac35b6fc6c3337
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_18ba6612081e4c8d84e8a9617206130d", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_18ba6612081e4c8d84e8a9617206130d", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_18ba6612081e4c8d84e8a9617206130d', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_18ba6612081e4c8d84e8a9617206130d', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_18ba6612081e4c8d84e8a9617206130d","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_18ba6612081e4c8d84e8a9617206130d', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_7a497ec3604d42998fac35b6fc6c3337","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_7a497ec3604d42998fac35b6fc6c3337', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_7a497ec3604d42998fac35b6fc6c3337", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_7a497ec3604d42998fac35b6fc6c3337', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] buscando placa para reloj=watch_01: ready_anchors={'00:07'} libres=['00:07']
+[VERBOSE] EMPAREJAMIENTO creado watch=watch_01 anchor=00:07 session=sess_0fde41078f304ba9866855b8e7976873
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_7a497ec3604d42998fac35b6fc6c3337", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_7a497ec3604d42998fac35b6fc6c3337', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_7a497ec3604d42998fac35b6fc6c3337", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_7a497ec3604d42998fac35b6fc6c3337', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_7a497ec3604d42998fac35b6fc6c3337","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_7a497ec3604d42998fac35b6fc6c3337', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_7a497ec3604d42998fac35b6fc6c3337","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_7a497ec3604d42998fac35b6fc6c3337', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/status' retain=False payload=b'{"free_mem": 410800, "anchor": "00:07", "state": "online", "uptime_s": 2495, "battery_charging": false, "ip": "192.168.2.236", "rssi": -56, "protocol": "mqtt_uci_v1", "battery_voltage": 3.89, "power": "ON", "battery_percent": 68}'
+[VERBOSE] procesando topic='uwb/pico/00:07/status' retained=False body={'free_mem': 410800, 'anchor': '00:07', 'state': 'online', 'uptime_s': 2495, 'battery_charging': False, 'ip': '192.168.2.236', 'rssi': -56, 'protocol': 'mqtt_uci_v1', 'battery_voltage': 3.89, 'power': 'ON', 'battery_percent': 68}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_0fde41078f304ba9866855b8e7976873","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_0fde41078f304ba9866855b8e7976873', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_0fde41078f304ba9866855b8e7976873", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_0fde41078f304ba9866855b8e7976873', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] buscando placa para reloj=watch_01: ready_anchors={'00:07'} libres=['00:07']
+[VERBOSE] EMPAREJAMIENTO creado watch=watch_01 anchor=00:07 session=sess_4b961badd3354dfc9142902a0160abef
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_0fde41078f304ba9866855b8e7976873", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_0fde41078f304ba9866855b8e7976873', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_0fde41078f304ba9866855b8e7976873","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_0fde41078f304ba9866855b8e7976873', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_0fde41078f304ba9866855b8e7976873","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_0fde41078f304ba9866855b8e7976873', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_4b961badd3354dfc9142902a0160abef","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_4b961badd3354dfc9142902a0160abef', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_4b961badd3354dfc9142902a0160abef", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_4b961badd3354dfc9142902a0160abef", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_4b961badd3354dfc9142902a0160abef', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] buscando placa para reloj=watch_01: ready_anchors={'00:07'} libres=['00:07']
+[VERBOSE] EMPAREJAMIENTO creado watch=watch_01 anchor=00:07 session=sess_fc83e6b242004c4dbdf88589e231b88b
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_4b961badd3354dfc9142902a0160abef', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_4b961badd3354dfc9142902a0160abef", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_4b961badd3354dfc9142902a0160abef', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_4b961badd3354dfc9142902a0160abef","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_4b961badd3354dfc9142902a0160abef', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_4b961badd3354dfc9142902a0160abef","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_4b961badd3354dfc9142902a0160abef', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_fc83e6b242004c4dbdf88589e231b88b","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_fc83e6b242004c4dbdf88589e231b88b', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_fc83e6b242004c4dbdf88589e231b88b","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_fc83e6b242004c4dbdf88589e231b88b', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_fc83e6b242004c4dbdf88589e231b88b", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_fc83e6b242004c4dbdf88589e231b88b', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_fc83e6b242004c4dbdf88589e231b88b", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] buscando placa para reloj=watch_01: ready_anchors={'00:07'} libres=['00:07']
+[VERBOSE] EMPAREJAMIENTO creado watch=watch_01 anchor=00:07 session=sess_39a7445da3dd45bc817ac69636c76cce
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_fc83e6b242004c4dbdf88589e231b88b', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_fc83e6b242004c4dbdf88589e231b88b", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_fc83e6b242004c4dbdf88589e231b88b", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_fc83e6b242004c4dbdf88589e231b88b', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_fc83e6b242004c4dbdf88589e231b88b', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_fc83e6b242004c4dbdf88589e231b88b", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_fc83e6b242004c4dbdf88589e231b88b', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_fc83e6b242004c4dbdf88589e231b88b","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_fc83e6b242004c4dbdf88589e231b88b', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_fc83e6b242004c4dbdf88589e231b88b","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_fc83e6b242004c4dbdf88589e231b88b', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_39a7445da3dd45bc817ac69636c76cce","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_39a7445da3dd45bc817ac69636c76cce', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/session/watch_01' retain=False payload=b'{"watch_id":"watch_01","session_id":"sess_39a7445da3dd45bc817ac69636c76cce","state":"stopped"}'
+[VERBOSE] procesando topic='uwb/session/watch_01' retained=False body={'watch_id': 'watch_01', 'session_id': 'sess_39a7445da3dd45bc817ac69636c76cce', 'state': 'stopped'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_39a7445da3dd45bc817ac69636c76cce", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_39a7445da3dd45bc817ac69636c76cce', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] buscando placa para reloj=watch_01: ready_anchors={'00:07'} libres=['00:07']
+[VERBOSE] EMPAREJAMIENTO creado watch=watch_01 anchor=00:07 session=sess_4ce3c2643f604073bd3699f0ddc15070
+[VERBOSE] mensaje recibido topic='uwb/pico/00:07/events' retain=False payload=b'{"session_id": "sess_39a7445da3dd45bc817ac69636c76cce", "event": "closed", "already_closed": true, "anchor": "00:07", "watch_id": "watch_01"}'
+[VERBOSE] procesando topic='uwb/pico/00:07/events' retained=False body={'session_id': 'sess_39a7445da3dd45bc817ac69636c76cce', 'event': 'closed', 'already_closed': True, 'anchor': '00:07', 'watch_id': 'watch_01'}
+[VERBOSE] no emparejo reloj=watch_01: activo=True ready_watch=True ready_watches={'watch_01'}
