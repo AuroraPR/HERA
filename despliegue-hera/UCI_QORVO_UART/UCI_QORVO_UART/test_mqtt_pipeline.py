@@ -156,6 +156,31 @@ class PipelineTests(unittest.TestCase):
         a, b = c.model.positions["00:01"], c.model.positions["00:02"]
         self.assertAlmostEqual(model._kernel("00:01", "00:02"), math.exp(-math.dist(a, b) / .30))
 
+    def test_close_timeout_survives_stop_retries_and_requires_recovery(self):
+        c, sent, rows, clock = self.coordinator()
+        c.tick()
+        session = next(iter(c.sessions.values()))
+        watch, anchor, sid = session["watch_id"], session["anchor"], session["session_id"]
+        c.config["cycle"]["enabled"] = False
+        c.record(session, -1)
+        c.close(session)
+        for step in range(1, 10):
+            clock[0] = step * .26
+            c.tick()
+        self.assertNotIn(sid, c.sessions)
+        self.assertNotIn(watch, c.by_watch)
+        self.assertNotIn(anchor, c.by_anchor)
+        self.assertNotIn(watch, c.ready_watches)
+        self.assertNotIn(anchor, c.ready_anchors)
+        recoveries = list(c.recovery.values())
+        for recovery in recoveries:
+            if recovery["kind"] == "pico":
+                c.handle("uwb/pico/" + anchor + "/events", {"event": "ready", "session_id": recovery["sid"]})
+            else:
+                c.handle("uwb/session/" + watch, {"state": "stopped", "session_id": recovery["sid"]})
+        self.assertIn(watch, c.ready_watches)
+        self.assertIn(anchor, c.ready_anchors)
+
     def test_missing_real_anchor_position_fails_before_any_assignment(self):
         config = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
         config["boards"].append({"anchor": "FF:FF"})

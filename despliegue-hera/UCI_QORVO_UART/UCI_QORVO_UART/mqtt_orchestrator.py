@@ -101,6 +101,8 @@ class MqttCoordinator:
         self.send("uwb/pico/" + session["anchor"] + "/commands", body)
 
     def close(self, session):
+        if not session["closing"]:
+            session["close_started"] = self.clock()
         session["closing"] = True
         session["last_stop"] = self.clock()
         self.watch_command(session, "stop")
@@ -238,7 +240,7 @@ class MqttCoordinator:
                 self.close(session)
             elif session["closing"] and now - session["last_stop"] >= .25:
                 # Reenvío corto para dar margen a un ACK perdido.
-                if now - session["last_stop"] < 2.0:
+                if now - session["close_started"] < 2.0:
                     self.close(session)
                 else:
                     # No bloquear indefinidamente el reloj ni la placa si uno
@@ -248,6 +250,12 @@ class MqttCoordinator:
                     self.by_watch.pop(session["watch_id"], None)
                     self.by_anchor.pop(session["anchor"], None)
                     self.sessions.pop(session["session_id"], None)
+                    if not session["watch_closed"]:
+                        self.ready_watches.discard(session["watch_id"])
+                        self.request_recovery("watch", session["watch_id"])
+                    if not session["pico_closed"]:
+                        self.ready_anchors.discard(session["anchor"])
+                        self.request_recovery("pico", session["anchor"])
         if not self.connected or not self.config.get("cycle", {}).get("enabled", True):
             return
         order = self.watches[self.cursor:] + self.watches[:self.cursor]
