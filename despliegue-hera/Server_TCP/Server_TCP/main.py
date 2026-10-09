@@ -17,7 +17,7 @@ from umqtt.simple import MQTTClient
 from anchor_uci import AnchorWorker
 
 SSID = "Adetem"
-PASSWORD = "JaviAurora"
+PASSWORD = "AuroraJavi"
 
 UART_ID = 0
 UART_TX_PIN = 0   # GP0 -> RXD_RPI (pin 10 de J10 del DWM)
@@ -35,8 +35,8 @@ DIVIDER_FACTOR = 2.0
 ADC_REFERENCE_VOLTAGE = 3.3
 
 # --- Identidad de esta Pico / anchor ---
-ANCHOR_ID = "00:01"          # CAMBIAR por placa: "00:01", "00:02", etc.
-MQTT_BROKER = "192.168.18.3"
+ANCHOR_ID = "00:07"          # CAMBIAR por placa: "00:01", "00:02", etc.
+MQTT_BROKER = "192.168.2.168"
 MQTT_PORT = 1883
 MQTT_CLIENT_ID = "pico_" + ANCHOR_ID.replace(":", "")
 

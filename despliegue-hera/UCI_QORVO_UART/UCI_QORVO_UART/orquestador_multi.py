@@ -1104,7 +1104,7 @@ def main() -> None:
         return
 
     mqtt_cfg = config.get("mqtt", {})
-    broker = mqtt_cfg.get("broker", "192.168.18.22")
+    broker = mqtt_cfg.get("broker", "192.168.2.168")
     port = int(mqtt_cfg.get("port", 1883))
 
     orchestrator_cfg = config.get("orchestrator", {})

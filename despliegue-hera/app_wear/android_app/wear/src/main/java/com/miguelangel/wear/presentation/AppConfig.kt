@@ -20,7 +20,7 @@ object AppConfig {
 
     // Valores por defecto: se usan solo la primera vez, antes de que el
     // usuario configure nada desde la pantalla de ajustes.
-    const val DEFAULT_BROKER_HOST = "192.168.18.3"
+    const val DEFAULT_BROKER_HOST = "192.168.2.168"
     const val DEFAULT_WATCH_ID = "watch_01"
 
     private fun prefs(context: Context) =

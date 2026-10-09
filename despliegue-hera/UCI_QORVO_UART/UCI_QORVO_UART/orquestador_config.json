@@ -1,6 +1,6 @@
 {
   "mqtt": {
-    "broker": "192.168.18.3",
+    "broker": "192.168.2.168",
     "port": 1883
   },
   "orchestrator": {
@@ -30,22 +30,10 @@
   },
   "boards": [
     {
-      "anchor": "00:01",
-      "my_mac": "00:01",
-      "serial_port": "uart:socket://192.168.18.63:9000",
-      "label": "placa_1"
-    },
-    {
-      "anchor": "00:02",
-      "my_mac": "00:02",
-      "serial_port": "uart:socket://192.168.18.54:9000",
-      "label": "placa_2"
-    },
-    {
-      "anchor": "00:03",
-      "my_mac": "00:03",
-      "serial_port": "COM10",
-      "label": "placa_3"
+      "anchor": "00:07",
+      "my_mac": "00:07",
+      "serial_port": "uart:socket://192.168.2.236:9000",
+      "label": "placa_7"
     }
   ],
   "cycle": {
