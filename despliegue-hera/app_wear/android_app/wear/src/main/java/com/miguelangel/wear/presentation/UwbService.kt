@@ -91,9 +91,8 @@ class UwbService : Service() {
         acquireWakeLock()
 
         saveString("watch_id", watchId)
-        saveString("uwb_mac", "--:--")
-        saveString("current_anchor", "--")
-        saveFloat("distance", -1f)
+        // Conservamos la última MAC, placa y distancia entre sesiones y
+        // reinicios del servicio para que la UI no pierda la última medida.
         setState(ServiceState.STARTING)
 
         val uwbManager = UwbManager.createInstance(this)
@@ -403,7 +402,6 @@ class UwbService : Service() {
 
             currentAnchor = anchor
             saveString("current_anchor", currentAnchor)
-            saveFloat("distance", -1f)
 
             setState(ServiceState.PREPARING_UWB)
 
@@ -446,8 +444,8 @@ class UwbService : Service() {
             uwbRanging.stopRanging()
 
             currentAnchor = "--"
-            saveString("current_anchor", currentAnchor)
-            saveFloat("distance", -1f)
+            // No borramos la última placa ni la última distancia válida.
+            // Se actualizarán cuando comience una nueva sesión.
 
             // OJO:
             // No borramos uwb_mac aquí, porque representa la última MAC UWB conocida.
