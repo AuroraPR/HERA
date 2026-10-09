@@ -4,6 +4,7 @@ import bisect
 import csv
 import math
 import re
+import json
 from collections import defaultdict
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -33,8 +34,10 @@ def timestamp_segundo(timestamp):
     return rounded.isoformat(timespec="seconds") + ".0000"
 
 
-def segmentar(uwb, data_dir, output, patron_escenas="escena_*.csv"):
-    paths = sorted(data_dir.glob(patron_escenas), key=lambda p: [int(s) if s.isdigit() else s for s in re.split(r"(\d+)", p.stem)])
+def segmentar(uwb, data_dir, output, patron_escenas="escena_*.csv", escenas=None):
+    paths = [Path(p) if Path(p).is_absolute() else data_dir / p for p in (escenas or [])]
+    if not paths:
+        paths = sorted(data_dir.glob(patron_escenas), key=lambda p: [int(s) if s.isdigit() else s for s in re.split(r"(\d+)", p.stem)])
     if not paths:
         raise ValueError(f"No hay ficheros {patron_escenas}")
     scenes = [(p.stem, leer_escena(p)) for p in paths]
@@ -65,7 +68,7 @@ def segmentar(uwb, data_dir, output, patron_escenas="escena_*.csv"):
     if not anchors:
         raise ValueError("El fichero UWB no contiene anchors")
     fields = ["label", "timestamp_inicio", "timestamp_fin", "x", "y"]
-    fields += [f"anchor_{anchor}_{metric}_{stat}" for anchor in anchors for metric in metrics for stat in ("median", "min", "max")]
+    fields += [f"anchor_{anchor}_{metric}_median" for anchor in anchors for metric in metrics]
     fields.append("data")
     output.parent.mkdir(parents=True, exist_ok=True)
     rows = 0
@@ -83,7 +86,7 @@ def segmentar(uwb, data_dir, output, patron_escenas="escena_*.csv"):
                 for anchor in anchors:
                     for metric in metrics:
                         values = buckets[label, second, anchor, metric]
-                        row.extend((median(values), min(values), max(values)) if values else (-1, -1, -1))
+                        row.append(median(values) if values else -1)
                 status = "NO-data" if all(value == -1 for value in row[5:]) else "data"
                 row[3:] = [f"{value:.4f}" for value in row[3:]]
                 row.append(status)
@@ -99,5 +102,7 @@ if __name__ == "__main__":
     parser.add_argument("--escenas", type=Path, default=base / "data")
     parser.add_argument("--salida", type=Path, default=base / "segmentacion.csv")
     parser.add_argument("--patron-escenas", default="escena_*.csv")
+    parser.add_argument("--escenas-json", type=Path, help="JSON con un array de ficheros de escena")
     args = parser.parse_args()
-    segmentar(args.uwb, args.escenas, args.salida, args.patron_escenas)
+    scene_list = json.loads(args.escenas_json.read_text(encoding="utf-8")) if args.escenas_json else None
+    segmentar(args.uwb, args.escenas, args.salida, args.patron_escenas, scene_list)
