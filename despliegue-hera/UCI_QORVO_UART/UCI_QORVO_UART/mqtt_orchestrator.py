@@ -163,6 +163,15 @@ class MqttCoordinator:
             else:
                 self.vlog(f"placa {anchor}: NO lista; state={body.get('state')} power={body.get('power')} protocol={body.get('protocol')}")
                 self.ready_anchors.discard(anchor)
+                if body.get("state") == "offline" and anchor in self.boards:
+                    # Misma recuperación que POST /action/reset/<anchor>.
+                    # Se reintenta hasta recibir ready, incluso si la Pico
+                    # vuelve a conectarse después del mensaje offline.
+                    sid = self.by_anchor.get(anchor)
+                    if sid:
+                        self.record(self.sessions[sid], -1)
+                        self.close(self.sessions[sid])
+                    self.request_recovery("pico", anchor)
             return
         if retained:
             return
