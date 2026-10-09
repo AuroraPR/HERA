@@ -56,6 +56,7 @@ class MqttCoordinator:
     def __init__(self, config, config_path, publish, clock=time.monotonic, log=None):
         self.config, self.publish, self.clock = config, publish, clock
         options = config["orchestrator"]
+        self.verbose = bool(options.get("verbose", False))
         self.limit = float(options.get("timelimit", 5))
         if not 0 < self.limit <= 5:
             raise ValueError("timelimit must be in (0,5]")
@@ -78,6 +79,10 @@ class MqttCoordinator:
         self.recovery = {}
         self.log = log or self.write_measurement
         self.data_dir = Path(config_path).resolve().parent / options.get("data_dir", "data")
+
+    def vlog(self, message):
+        if self.verbose:
+            print("[VERBOSE] " + message, flush=True)
 
     def send(self, topic, body):
         self.publish(topic, body)
@@ -124,6 +129,7 @@ class MqttCoordinator:
         self.log(session, distance, rssi)
 
     def handle(self, topic, body, retained=False):
+        self.vlog(f"procesando topic={topic!r} retained={retained} body={body}")
         parts = topic.split("/")
         if parts[:2] == ["uwb", "presence"] and len(parts) == 3:
             watch = parts[2]
@@ -132,7 +138,10 @@ class MqttCoordinator:
             # Retained presence is allowed; all command/result events are live.
             if body.get("state", body.get("status")) == "online":
                 if watch in self.watches and watch not in self.ready_watches:
+                    self.vlog(f"reloj {watch}: online y configurado; solicito reset/presentación")
                     self.request_recovery("watch", watch)
+                else:
+                    self.vlog(f"reloj {watch}: online pero no listo; configurados={self.watches}")
             else:
                 self.ready_watches.discard(watch)
             return
@@ -147,8 +156,10 @@ class MqttCoordinator:
                     health[target] = body.get(source)
             if body.get("state") == "online" and body.get("power", "ON") == "ON" and body.get("protocol") == "mqtt_uci_v1":
                 if anchor in self.boards and anchor not in self.ready_anchors:
+                    self.vlog(f"placa {anchor}: online, power ON y protocolo válido; solicito ready")
                     self.request_recovery("pico", anchor)
             else:
+                self.vlog(f"placa {anchor}: NO lista; state={body.get('state')} power={body.get('power')} protocol={body.get('protocol')}")
                 self.ready_anchors.discard(anchor)
             return
         if retained:
@@ -234,10 +245,13 @@ class MqttCoordinator:
         self.cursor = (self.cursor + 1) % len(self.watches) if self.watches else 0
         for watch in order:
             if watch in self.by_watch or watch not in self.ready_watches:
+                self.vlog(f"no emparejo reloj={watch}: activo={watch in self.by_watch} ready_watch={watch in self.ready_watches} ready_watches={self.ready_watches}")
                 continue
             free = [a for a in self.boards if a in self.ready_anchors and a not in self.by_anchor]
+            self.vlog(f"buscando placa para reloj={watch}: ready_anchors={self.ready_anchors} libres={free}")
             anchor, probabilities = self.model.choose(watch, free)
             if anchor is None:
+                self.vlog(f"sin placa elegible para reloj={watch}")
                 continue
             sid = "sess_" + uuid.uuid4().hex
             session = {"session_id": sid, "watch_id": watch, "anchor": anchor,
@@ -249,6 +263,7 @@ class MqttCoordinator:
             self.sessions[sid] = session
             self.by_watch[watch], self.by_anchor[anchor] = sid, sid
             self.watch_command(session, "start")
+            self.vlog(f"EMPAREJAMIENTO creado watch={watch} anchor={anchor} session={sid}")
         assert len(self.by_anchor) == len(self.by_watch) == len(self.sessions)
 
     def request_recovery(self, kind, identity):
@@ -285,6 +300,11 @@ class MqttCoordinator:
 
 def run(config, config_path):
     import paho.mqtt.client as mqtt
+    verbose = bool(config.get("orchestrator", {}).get("verbose", False))
+    def vprint(message):
+        if verbose:
+            print("[VERBOSE] " + message, flush=True)
+
     events = queue.Queue()
     client = mqtt.Client(client_id="hera_orchestrator_" + uuid.uuid4().hex[:8])
     def publish(topic, body):
@@ -323,13 +343,18 @@ def run(config, config_path):
         server = ThreadingHTTPServer((dashboard.get("host", "0.0.0.0"), int(dashboard.get("port", 8080))), Handler)
         threading.Thread(target=server.serve_forever, daemon=True).start()
     def connected(client, userdata, flags, rc):
+        vprint(f"on_connect rc={rc} broker={config['mqtt']['broker']}:{config['mqtt'].get('port', 1883)}")
         if rc == 0:
             for topic in ("uwb/presence/+", "uwb/session/+", "uwb/pico/+/status", "uwb/pico/+/events"):
-                client.subscribe(topic, qos=1)
+                result, mid = client.subscribe(topic, qos=1)
+                vprint(f"suscripción topic={topic!r} result={result} mid={mid}")
             events.put(("__connected", {}, False))
+        else:
+            vprint(f"conexión MQTT rechazada rc={rc}")
     client.on_connect = connected
     client.on_disconnect = lambda *args: events.put(("__disconnected", {}, False))
     def message(client, userdata, msg):
+        vprint(f"mensaje recibido topic={msg.topic!r} retain={msg.retain} payload={msg.payload!r}")
         try:
             body = json.loads(msg.payload)
             if isinstance(body, dict):
@@ -338,6 +363,7 @@ def run(config, config_path):
             pass
     client.on_message = message
     client.connect(config["mqtt"]["broker"], int(config["mqtt"].get("port", 1883)), keepalive=15)
+    vprint(f"cliente MQTT creado; conectando a {config['mqtt']['broker']}:{config['mqtt'].get('port', 1883)}")
     client.loop_start()
     last_status = -1.0
     try:
