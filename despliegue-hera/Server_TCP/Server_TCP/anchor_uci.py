@@ -166,7 +166,9 @@ class AnchorWorker:
         while len(self.buffer) >= 4:
             mt = self.buffer[0] >> 5
             if mt not in (1, 2, 3):
-                del self.buffer[0]
+                # Algunas versiones de MicroPython no soportan borrar
+                # elementos de un bytearray con ``del buffer[index]``.
+                self.buffer = self.buffer[1:]
                 continue
             size = self.buffer[3]
             if len(self.buffer) < 4 + size:
@@ -174,7 +176,7 @@ class AnchorWorker:
             header = self.buffer[0]
             gid, oid = header & 15, self.buffer[1] & 63
             payload = bytes(self.buffer[4:4 + size])
-            del self.buffer[:4 + size]
+            self.buffer = self.buffer[4 + size:]
             key = (mt, gid, oid)
             payload = self.fragments.pop(key, b"") + payload
             if len(payload) > 2048:
