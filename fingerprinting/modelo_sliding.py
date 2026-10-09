@@ -11,9 +11,12 @@ from sklearn.multioutput import MultiOutputRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from xgboost import XGBRegressor
 import torch
+import joblib
 from torch import nn
 
-W = 10
+PAST = 10
+FUTURE = 5
+W = PAST + 1 + FUTURE
 
 def make_windows(df, anchors, w=W):
     cols = [f"anchor_{a}_distance_cm_median" for a in anchors]
@@ -22,8 +25,8 @@ def make_windows(df, anchors, w=W):
         g = g.sort_values("timestamp_inicio").reset_index(drop=True)
         values = g[cols].to_numpy(float)
         xy = g[["x", "y"]].to_numpy(float)
-        for end in range(len(g)):
-            start = max(0, end - w + 1)
+        for end in range(PAST, len(g) - FUTURE):
+            start = end - PAST
             seq = values[start:end + 1]
             # Cada placa conserva su ultima muestra valida dentro de la ventana.
             latest = np.full(len(anchors), -1.0)
@@ -32,8 +35,7 @@ def make_windows(df, anchors, w=W):
                 if len(valid): latest[j] = valid[-1]
             if np.all(latest == -1):
                 continue
-            padded = np.full((w, len(anchors)), -1.0)
-            padded[-len(seq):] = seq
+            padded = seq
             out.append({"scene": scene, "time": g.loc[end, "timestamp_inicio"],
                         "x": xy[end, 0], "y": xy[end, 1], "latest": latest,
                         "sequence": padded})
@@ -79,7 +81,12 @@ def main():
             true=np.array([[r["x"],r["y"]] for r in te]); all_true.append(true); all_pred.append(pred)
             plt.figure(figsize=(9,4)); plt.plot(true[:,0],true[:,1],"r.-",label="ground truth"); plt.plot(pred[:,0],pred[:,1],"b.-",label="predicción"); plt.xlabel("x"); plt.ylabel("y"); plt.title(f"{model_name} | test={held}"); plt.legend(); plt.grid(True); plt.tight_layout(); plt.savefig(args.salida/f"{model_name}_{held}.png",dpi=150); plt.close()
         yt=np.vstack(all_true); yp=np.vstack(all_pred); results.append({"model":model_name,"mae":float(mean_absolute_error(yt,yp)),"rmse":float(np.sqrt(mean_squared_error(yt,yp))),"n":len(yt)})
-    (args.salida/"metrics.json").write_text(json.dumps({"W":W,"time_step":1,"models":results},indent=2),encoding="utf-8")
+    # Modelo final XGBoost entrenado con todas las ventanas disponibles.
+    final = MultiOutputRegressor(XGBRegressor(n_estimators=250,max_depth=4,learning_rate=.05,subsample=.9,colsample_bytree=.9,objective="reg:squarederror",n_jobs=2))
+    final.fit(np.stack([r["latest"] for r in windows]), np.array([[r["x"],r["y"]] for r in windows]))
+    joblib.dump(final, args.salida / "xgboost_sliding_5past_5future.joblib")
+    (args.salida/"model_metadata.json").write_text(json.dumps({"past_seconds":PAST,"future_seconds":FUTURE,"time_step":1,"anchors":anchors,"features":"ultima muestra valida por placa dentro de la ventana","target":["x","y"]},indent=2),encoding="utf-8")
+    (args.salida/"metrics.json").write_text(json.dumps({"past_seconds":PAST,"future_seconds":FUTURE,"W":W,"time_step":1,"models":results},indent=2),encoding="utf-8")
     print(json.dumps(results, indent=2))
 
 if __name__ == "__main__": main()

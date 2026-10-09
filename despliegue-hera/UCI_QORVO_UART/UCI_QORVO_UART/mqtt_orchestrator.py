@@ -237,8 +237,17 @@ class MqttCoordinator:
                 self.record(session, -1)
                 self.close(session)
             elif session["closing"] and now - session["last_stop"] >= .25:
-                self.close(session)
-            # If a close ACK is lost, retain ownership; never reuse unsafely.
+                # Reenvío corto para dar margen a un ACK perdido.
+                if now - session["last_stop"] < 2.0:
+                    self.close(session)
+                else:
+                    # No bloquear indefinidamente el reloj ni la placa si uno
+                    # de los dos ACK de cierre nunca llega.
+                    self.vlog(f"liberación forzada session={session['session_id']} "
+                              f"watch_closed={session['watch_closed']} pico_closed={session['pico_closed']}")
+                    self.by_watch.pop(session["watch_id"], None)
+                    self.by_anchor.pop(session["anchor"], None)
+                    self.sessions.pop(session["session_id"], None)
         if not self.connected or not self.config.get("cycle", {}).get("enabled", True):
             return
         order = self.watches[self.cursor:] + self.watches[:self.cursor]

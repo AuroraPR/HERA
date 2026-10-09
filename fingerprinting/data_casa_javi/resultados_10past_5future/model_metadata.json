@@ -1,0 +1,21 @@
+{
+  "past_seconds": 10,
+  "future_seconds": 5,
+  "time_step": 1,
+  "anchors": [
+    "00:00",
+    "00:01",
+    "00:02",
+    "00:03",
+    "00:05",
+    "00:06",
+    "00:07",
+    "00:08",
+    "00:09"
+  ],
+  "features": "ultima muestra valida por placa dentro de la ventana",
+  "target": [
+    "x",
+    "y"
+  ]
+}
