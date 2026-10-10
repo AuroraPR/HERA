@@ -321,7 +321,10 @@ class UwbService : Service() {
                     val deadline = SystemClock.elapsedRealtime() + remaining
                     val ok = withTimeoutOrNull(remaining) {
                         startRealRanging(command.optString("anchor"), sid,
-                            command.optInt("uwb_session_id", 42))
+                            command.optInt("uwb_session_id", 42), command.optBoolean("multicast", false),
+                            command.optJSONArray("anchors")?.let { array ->
+                                (0 until array.length()).map { array.getString(it) }
+                            } ?: listOf(command.optString("anchor")))
                     } ?: false
                     if (!ok) { closeAttempt(sid); return }
                     sessionTimeoutJob = coroutineScope.launch {
@@ -393,7 +396,7 @@ class UwbService : Service() {
         Log.d("MQTT_TEST", "Publish ejecutado en topic $sessionTopic")
     }
 
-    private suspend fun startRealRanging(anchor: String, sessionId: String, uwbSessionId: Int): Boolean {
+    private suspend fun startRealRanging(anchor: String, sessionId: String, uwbSessionId: Int, multicast: Boolean = false, peers: List<String> = listOf(anchor)): Boolean {
         try {
             distanceJob?.cancelAndJoin()
             distanceJob = null
@@ -416,7 +419,7 @@ class UwbService : Service() {
             localMac = currentSessionMac
             saveString("uwb_mac", currentSessionMac)
 
-            val started = uwbRanging.startRanging(anchor, uwbSessionId)
+            val started = uwbRanging.startRanging(anchor, uwbSessionId, multicast, peers)
             if (!started) {
                 Log.e("UwbService", "No se pudo iniciar ranging con $anchor")
                 setState(ServiceState.ERROR)

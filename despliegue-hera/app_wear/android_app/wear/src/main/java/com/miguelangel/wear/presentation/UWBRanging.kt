@@ -63,7 +63,7 @@ class UWBRanging(
 
     fun isRangingActive(): Boolean = rangingActive
 
-    suspend fun startRanging(remoteAdr: String, uwbSessionId: Int = 42): Boolean {
+    suspend fun startRanging(remoteAdr: String, uwbSessionId: Int = 42, multicast: Boolean = false, peers: List<String> = listOf(remoteAdr)): Boolean {
         val session = clientSession
         if (session == null) {
             Log.w("UWBRanging", "No hay sesión UWB preparada")
@@ -73,12 +73,10 @@ class UWBRanging(
         return try {
             lastDistance = null
 
-            val devices = listOf(
-                UwbDevice(UwbAddress(remoteAdr))
-            )
+            val devices = peers.map { UwbDevice(UwbAddress(it)) }
 
             val partnerParameters = RangingParameters(
-                uwbConfigType = RangingParameters.CONFIG_UNICAST_DS_TWR,
+                uwbConfigType = if (multicast) RangingParameters.CONFIG_MULTICAST_DS_TWR else RangingParameters.CONFIG_UNICAST_DS_TWR,
                 sessionKeyInfo = byteArrayOf(0x08, 0x07, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06),
                 complexChannel = UwbComplexChannel(9, 9),
                 peerDevices = devices,

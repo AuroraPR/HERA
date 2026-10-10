@@ -24,7 +24,7 @@ def mac_bytes(mac):
     return raw
 
 
-def app_config(local_mac, peer_mac):
+def app_config(local_mac, peer_mac, multicast=False):
     # Same static STS / DS-TWR responder profile as run_fira_twr_backup.py.
     params = [(0x00, b"\x00"), (0x11, b"\x00"), (0x03, b"\x00"),
               (0x01, b"\x02"), (0x06, mac_bytes(local_mac)), (0x04, b"\x09"),
@@ -36,6 +36,9 @@ def app_config(local_mac, peer_mac):
               (0x1b, b"\x06"), (0x32, b"\x00\x00"), (0x2c, b"\x01"),
               (0x13, b"\x01"), (0x2d, b"\x00"), (0x05, b"\x01"),
               (0x07, mac_bytes(peer_mac)), (0x24, b"\x00"), (0x35, b"\x01")]
+    if multicast:
+        params = [(key, b"\x01" if key == 0x03 else b"\x14" if key == 0x1b else value)
+                  for key, value in params]
     return bytes((len(params),)) + b"".join(bytes((key, len(value))) + value for key, value in params)
 
 
@@ -114,7 +117,7 @@ class AnchorWorker:
                            "watch_id": message.get("watch_id")})
             return
         # Validate before claiming ownership or emitting UART commands.
-        config = app_config(self.anchor, message["watch_mac"])
+        config = app_config(self.anchor, message["watch_mac"], message.get("multicast", False))
         uwb_id = int(message["uwb_session_id"])
         if not 0 < uwb_id < 0x80000000:
             raise ValueError("Invalid UWB session ID")
