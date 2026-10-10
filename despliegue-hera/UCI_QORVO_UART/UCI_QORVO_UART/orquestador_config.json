@@ -6,7 +6,7 @@
   "orchestrator": {
     "transport": "mqtt",
     "verbose": true,
-    "timelimit": 5,
+    "timelimit": 3,
     "data_dir": "data",
     "run_script": "run_fira_twr_backup.py",
     "python_cmd": "python",

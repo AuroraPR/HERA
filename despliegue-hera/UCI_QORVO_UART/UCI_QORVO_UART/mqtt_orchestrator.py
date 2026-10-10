@@ -88,12 +88,16 @@ class MqttCoordinator:
         self.publish(topic, body)
 
     def watch_command(self, session, action):
+        if action == "start":
+            self.vlog(f"START reloj={session['watch_id']} placa={session['anchor']} sesión={session['session_id']}")
         self.send("uwb/commands/" + session["watch_id"],
                   {"action": action, "session_id": session["session_id"],
                    "anchor": session["anchor"], "uwb_session_id": session["uwb_session_id"],
                    "timelimit_ms": max(1, int((session["deadline"] - self.clock()) * 1000)) if action == "start" else 0})
 
     def pico_command(self, session, action):
+        if action == "start":
+            self.vlog(f"START placa={session['anchor']} reloj={session['watch_id']} sesión={session['session_id']}")
         body = {"action": action, "session_id": session["session_id"],
                 "watch_id": session["watch_id"], "uwb_session_id": session["uwb_session_id"],
                 "watch_mac": session.get("watch_mac", ""),
@@ -117,6 +121,7 @@ class MqttCoordinator:
             rssi = -1
         session["recorded"] = True
         session["distance_cm"] = distance
+        self.vlog(f"DISTANCIA reloj={session['watch_id']} placa={session['anchor']} cm={distance} rssi={rssi} sesión={session['session_id']}")
         self.model.record(session["watch_id"], session["anchor"], distance)
         health = self.board_health[session["anchor"]]
         health["last_attempt_at"] = time.time()
@@ -131,7 +136,6 @@ class MqttCoordinator:
         self.log(session, distance, rssi)
 
     def handle(self, topic, body, retained=False):
-        self.vlog(f"procesando topic={topic!r} retained={retained} body={body}")
         parts = topic.split("/")
         if parts[:2] == ["uwb", "presence"] and len(parts) == 3:
             watch = parts[2]
@@ -140,10 +144,7 @@ class MqttCoordinator:
             # Retained presence is allowed; all command/result events are live.
             if body.get("state", body.get("status")) == "online":
                 if watch in self.watches and watch not in self.ready_watches:
-                    self.vlog(f"reloj {watch}: online y configurado; solicito reset/presentación")
                     self.request_recovery("watch", watch)
-                else:
-                    self.vlog(f"reloj {watch}: online pero no listo; configurados={self.watches}")
             else:
                 self.ready_watches.discard(watch)
             return
@@ -158,10 +159,8 @@ class MqttCoordinator:
                     health[target] = body.get(source)
             if body.get("state") == "online" and body.get("power", "ON") == "ON" and body.get("protocol") == "mqtt_uci_v1":
                 if anchor in self.boards and anchor not in self.ready_anchors:
-                    self.vlog(f"placa {anchor}: online, power ON y protocolo válido; solicito ready")
                     self.request_recovery("pico", anchor)
             else:
-                self.vlog(f"placa {anchor}: NO lista; state={body.get('state')} power={body.get('power')} protocol={body.get('protocol')}")
                 self.ready_anchors.discard(anchor)
                 if body.get("state") == "offline" and anchor in self.boards:
                     # Misma recuperación que POST /action/reset/<anchor>.
@@ -377,7 +376,6 @@ def run(config, config_path):
     client.on_connect = connected
     client.on_disconnect = lambda *args: events.put(("__disconnected", {}, False))
     def message(client, userdata, msg):
-        vprint(f"mensaje recibido topic={msg.topic!r} retain={msg.retain} payload={msg.payload!r}")
         try:
             body = json.loads(msg.payload)
             if isinstance(body, dict):
