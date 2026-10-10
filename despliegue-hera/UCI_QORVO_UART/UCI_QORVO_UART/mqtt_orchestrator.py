@@ -271,13 +271,10 @@ class MqttCoordinator:
         self.cursor = (self.cursor + 1) % len(self.watches) if self.watches else 0
         for watch in order:
             if watch in self.by_watch or watch not in self.ready_watches:
-                self.vlog(f"no emparejo reloj={watch}: activo={watch in self.by_watch} ready_watch={watch in self.ready_watches} ready_watches={self.ready_watches}")
                 continue
             free = [a for a in self.boards if a in self.ready_anchors and a not in self.by_anchor]
-            self.vlog(f"buscando placa para reloj={watch}: ready_anchors={self.ready_anchors} libres={free}")
             anchor, probabilities = self.model.choose(watch, free)
             if anchor is None:
-                self.vlog(f"sin placa elegible para reloj={watch}")
                 continue
             sid = "sess_" + uuid.uuid4().hex
             session = {"session_id": sid, "watch_id": watch, "anchor": anchor,
